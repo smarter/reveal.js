@@ -119,8 +119,8 @@
 
                     - Recursively type subtrees, remembering the expected type
                     - <!-- .element: class="fragment" --> type `obj.fun(5)` with expected type `?`
-                      - <!-- .element: class="fragment" --> type `obj.fun` with expected type `? => String`
-                        - <!-- .element: class="fragment" --> type `obj` with expected type `{ fun: ? => String }`
+                      - <!-- .element: class="fragment" --> type `obj.fun` with expected type `? => ?`
+                        - <!-- .element: class="fragment" --> type `obj` with expected type `{ fun: ? => ? }`
                     - <!-- .element: class="fragment" --> Expected type used to:
                       - Infer type parameters
                       - Adapt type in some cases (implicit conversions, ...)
