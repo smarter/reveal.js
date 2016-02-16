@@ -41,37 +41,46 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
 				<section>
-					<h1>The architecture of Dotty</h1>
-					<h3>A next-generation Scala compiler</h3>
+					<h1>Hacking on Dotty</h1>
+					<h3>A live demo</h3>
 					<p>
 					  <small><a href="http://guillaume.martres.me">Guillaume Martres</a> - EPFL</small>
                       <br>
                       <ul>
                         <li>These slides are two-dimensional, the left and right arrow keys will skip over vertical slides</li>
                         <li>The space key will always go to the next slide</li>
-                      </ul<
+                      </ul>
 					</p>
 				</section>
-
-				<section>
-				  <h2>Note well</h2>
-                  <ul>
-                    <li>To avoid overloading you with information, this presentation omits or present a simplified version of many things</li>
-                    <li>The goal is to get you to understand the concepts we used so that you may reuse them in a completely different project, rather than to turn you into an expert on Dotty itself</li>
-                    <li>See the <a href="https://github.com/lampepfl/dotty/wiki/Getting-Started#talks-on-dotty">other talks on Dotty</a> if you're interested!</li>
-                  </ul>
-                </section>
 
 				<section>
 					<h2>Dotty</h2>
 					<ul>
                       <li>Started by Martin Odersky in 2013</li>
-                      <li>Bootstrapped (compiler can compile itself) in October 2015</li>
                       <li>A new architecture
                         <ul><li>Except for the backend (bytecode generator) which is mostly shared with Scala 2.12</li></ul>
                       </li>
                       <li>First goal: Simplify the internals of the type system</li>
+                      <li>Has a Scala 2 compatibility mode</li>
                       <li>Couple of years from being production-ready</li>
+                    </ul>
+                </section>
+
+				<section>
+					<h2>Tools</h2>
+					<ul>
+                      <li>In progress:
+                        <ul>
+                          <li>sbt incremental compilation</li>
+                        </ul>
+                      </li>
+                      <li>To do (contributions welcome!):
+                        <ul>
+                          <li>Presentation compiler</li>
+                          <li>Support for writing compiler plugins</li>
+                          <li>...</li>
+                        </ul>
+                      </li>
                     </ul>
                 </section>
 
@@ -97,7 +106,7 @@
 
                 <section>
 				<section>
-				  <h2>Part 1: Frontend</h2>
+				  <h2>Frontend</h2>
                   <h3>Generating trees and typing them</h3>
                 </section>
 
@@ -207,7 +216,7 @@ obj.fun(<font color="#6B9294">5</font>)</pre>
                 </section>
                 <section>
 				<section>
-				  <h2>Part 2: Middle-End</h2>
+				  <h2>Middle-End</h2>
                   <h3>Simplifing types and trees with successive transformations</h3>
                 </section>
 
@@ -258,6 +267,23 @@ override def transformSelect(tree: Select): Tree = {
 // transform them
 </code></pre>
                 </section>
+                </section>
+				<section>
+				  <h2>Demo</h2>
+                  <p>
+                    Let's implement a simple phase to trace method calls at runtime. The final code is at <br>
+                    <a href="https://github.com/smarter/dotty/commits/live-demo">https://github.com/smarter/dotty/commits/live-demo</a>
+                  </p>
+                </section>
+                <section>
+				  <h2>References</h2>
+                  <ul>
+                    <li>Code: <a href="http://github.com/lampepfl/dotty">github.com/lampepfl/dotty</a></li>
+                    <li>Other talks on Dotty on the <a href="https://github.com/lampepfl/dotty/wiki/Getting-Started#talks-on-dotty">GitHub Wiki</a></li>
+                  </ul>
+                </section>
+				<section>
+                  <h3>Additional slides</h3>
                 </section>
                 <section>
 				<section>
@@ -312,13 +338,6 @@ override def transformSelect(tree: Select): Tree = {
                 <section data-transition="none">
 				  <img src="images/minib7.png">
                 </section>
-                </section>
-                <section>
-				  <h2>References</h2>
-                  <ul>
-                    <li>Code: <a href="http://github.com/lampepfl/dotty">github.com/lampepfl/dotty</a></li>
-                    <li>Other talks on Dotty on the <a href="https://github.com/lampepfl/dotty/wiki/Getting-Started#talks-on-dotty">GitHub Wiki</a></li>
-                  </ul>
                 </section>
 			</div>
 
