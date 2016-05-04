@@ -1,50 +1,260 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+    <title>reveal.js</title>
 
-		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/black.css">
 
-		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <!-- Theme used for syntax highlighting of code -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
 
-		<!-- Printing and PDF exports -->
-		<script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-		</script>
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Printing and PDF exports -->
+    <script>
+      var link = document.createElement( 'link' );
+      link.rel = 'stylesheet';
+      link.type = 'text/css';
+      link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+      document.getElementsByTagName( 'head' )[0].appendChild( link );
+    </script>
+    <style>
+      .reveal * {
+        text-align: left;
+      }
+      h1,h2,h3,h4,h5,h6 {
+        text-align: center !important;
+      }
+      pre {
+        font-size: 27px !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h1>Dotty and types:<br> the story so far</h1>
+          <a href="http://guillaume.martres.me">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guillaume Martres</a> - EPFL
+        </section>
+        <!-- <section> -->
+          <section data-markdown><script type="text/template">
+              ## Type parameter inference
+          </script></section>
+          <section data-markdown><script type="text/template">
+              ## Typing crash course
 
-		<script src="lib/js/head.min.js"></script>
-		<script src="js/reveal.js"></script>
+              ```scala
+              def foo[T](x: T): T = x
 
-		<script>
-			// More info https://github.com/hakimel/reveal.js#configuration
-			Reveal.initialize({
-				history: true,
+              foo(1) // How is this typed?
+              ```
+              Typing is done from left-to-right
+              1. <!-- .element: class="fragment" --> Create a *type variable* for each missing type argument
+              2. <!-- .element: class="fragment" --> subtyping checks will constrain the type variable
+              3. <!-- .element: class="fragment" --> in the end, replace the type variable by a solution to the constraints
+          </script></section>
+          <section>
+            <h2 id="typechecking">Typing example</h2>
+            <p>
+              1. Typing <code>foo</code> creates a type variable <code>T?</code>
+               <pre><code data-trim>
+foo[T?]
+              </code></pre>
+              <span class="fragment">
+                2. Typing <code>foo[T?](1)</code> adds a constraint to <code>T?</code>
+                <pre><code data-trim>
+foo[T?](1) // T? &lt;: Int
+                </code></pre>
+              </span>
+              <span class="fragment">
+                3. Instantiating <code>T? = Int</code> respects the constraints
+                <pre><code data-trim>
+foo[Int](1)
+                </code></pre>
+              </span>
+            </p>
+          </section>
+          <!-- Things that we're not going to cover: add all constraints
+               properly even if recursive, interactions with subtyping -->
 
-				// More info https://github.com/hakimel/reveal.js#dependencies
-				dependencies: [
-					{ src: 'plugin/markdown/marked.js' },
-					{ src: 'plugin/markdown/markdown.js' },
-					{ src: 'plugin/notes/notes.js', async: true },
-					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
-				]
-			});
-		</script>
-	</body>
+          <section data-markdown><script type="text/template">
+              ## The art of instantiaton
+              - When should a type variable be instantiated?
+                - <!-- .element: class="fragment" --> as late as possible, to not miss constraint
+                - <!-- .element: class="fragment" --> but not too late, or typing is impossible
+              - <!-- .element: class="fragment" --> Instantiate to lower bound or higher bound?
+                - <!-- .element: class="fragment" --> Depends on where the type variable appear in the resulting type
+          </script></section>
+          <!-- <section data-markdown><script type="text/template"> -->
+          <!--     ## Safe instantiation -->
+          <!--     ```scala -->
+          <!--       foo[T?](…) // T? >: Lo <: Hi -->
+          <!--         .bar(…) -->
+          <!--     ``` -->
+          <!--     - Can we instantiate `T?` right after typing `foo[T?](…)` ? -->
+          <!--     - <\!-- .element: class="fragment" -\-> It depends on where `T` appears in `RetType`: -->
+          <!--       - <\!-- .element: class="fragment" -\-> Not present: any bound is safe -->
+          <!--       - <\!-- .element: class="fragment" -\-> Only covariantly: `T? = Lo` is safe -->
+          <!--       - <\!-- .element: class="fragment" -\-> Only contravariantly: `T? = Hi` is safe -->
+          <!--       - <\!-- .element: class="fragment" -\-> Otherwise, we can't. -->
+          <!-- </script></section> -->
+          <section>
+              <h2>Safe instantiation</h2>
+              <p>
+                <pre><code class="scala" data-trim>
+def foo[T](…): RetType = …
+foo[T?](…) // T? >: Lo <: Hi
+  .bar(…)
+                </code></pre>
+                <ul>
+                  <li class="fragment" data-fragment-index="1">Can we instantiate <code>T?</code> right after typing <code>foo[T?](…)</code> ?</li>
+                  <li class="fragment" data-fragment-index="2">It depends on where <code>T</code> appears in <code>RetType</code></li>
+                </ul>
+                <table class="fragment" data-fragment-index="3">
+                  <tr>
+                    <td><code>T</code> appears</td>
+                    <td>Safe?</td>
+                    <td><code>T? =</code></td>
+                  </tr>
+                  <tr>
+                    <td>nowhere</td>
+                    <td class="fragment" data-fragment-index="4">Yes</td>
+                    <td class="fragment" data-fragment-index="4">Lo (arbitrarily)</td>
+                  </tr>
+                  <tr>
+                    <td>covariantly</td>
+                    <td class="fragment" data-fragment-index="5">Yes</td>
+                    <td class="fragment" data-fragment-index="5">Lo</td>
+                  </tr>
+                  <tr>
+                    <td>contravariantly</td>
+                    <td class="fragment" data-fragment-index="6">Yes</td>
+                    <td class="fragment" data-fragment-index="6">Hi</td>
+                  </tr>
+                  <tr>
+                    <td>co- <b>and</b> contravariantly<br> or invariantly</td>
+                    <td class="fragment" data-fragment-index="7"><b>No</b></td>
+                    <td class="fragment" data-fragment-index="7">¯\_(ツ)_/¯</td>
+                  </tr>
+                </table>
+              </p>
+          </section>
+          <section data-markdown><script type="text/template">
+              ## The fear of `Nothing`
+              - `scalac` instantiates eagerly, even when it isn't safe
+              - <!-- .element: class="fragment" --> Counterbalanced by never inferring `Nothing`
+              ```scala
+              class Foo[T] { def put(x: T) = {} }
+              (new Foo).put("") // T? = String
+              ```
+              - <!-- .element: class="fragment" --> Fails if the lower bound isn't `Nothing`
+              ```scala
+              class Foo[T >: Null] { def put(x: T) = {} }
+              (new Foo).put("") // T? = Null
+                // type mismatch: Null does not match String
+              ```
+              - <!-- .element: class="fragment" --> Sometimes you really want to infer Nothing!
+              ```scala
+              class Foo[T]
+              def foo[T](x: Foo[T]) = x
+              foo(new Foo[Nothing]) // error
+              ```
+          </script></section>
+          <section data-markdown><script type="text/template">
+              ## Effect of instantiation order
+              ```scala
+              class A
+              class B
+              def same[T](x: T)(y: T) = {}
+              same(new A)(new B)
+                // error in scalac: found B, required A
+                // OK in dotty: T? = AnyRef
+              ```
+              - <!-- .element: class="fragment" --> Please use `=:=` instead :)
+          </script></section>
+          <section data-markdown><script type="text/template">
+              ## When do we really need to instantiate?
+              - When assigning a type to a `val` or `def`
+              - When typing a lambda expression
+              - Before performing an implicit search
+              - ...and a few other cases
+          </script></section>
+          <section data-markdown><script type="text/template">
+              ## Typing lambdas
+              ```scala
+              def foo(x: Int => Int): Int = x(0)
+              ```
+              `foo(x => x)` is desugared into:
+              ```scala
+              foo({
+                def $anonfun(x: Int): Int = x
+                closure($anonfun)
+              })
+              ```
+              - <!-- .element: class="fragment" --> To desugar a lambda we need its parameter types and return type
+              - <!-- .element: class="fragment" --> wAvoid inferring `Nothing` as a parameter type
+          </script></section>
+          <section data-markdown><script type="text/template">
+              ## "As late as possible" might still be earlier than scalac
+              ```scala
+              def app[T](x: T, y: T => T) = y(x)
+              app(1, (x: Int) => x) // OK in dotty and scalac
+              app(1, x => x) // OK in dotty, error in scalac
+              ```
+          </script></section>
+          <section data-markdown><script type="text/template">
+              ## Implicit search
+              - Need fully-defined type of implicit value to search
+              - <!-- .element: class="fragment" data-fragment-index="1" --> Narrowing does not hold:
+
+              <pre class="fragment" data-fragment-index="1"><code data-trim class="scala">
+              class Contra[-T]
+              def tag[T](x: T)(implicit ct: ClassTag[T]) = ct
+              tag(new Contra[Int]) // we want T? = Int
+              </code></pre>
+
+              - <!-- .element: class="fragment" data-fragment-index="2" --> Intuitively, if the user constrains only one bound of a type variable, we should instantiate to that bound
+          </script></section>
+          <!-- <section data-markdown><script type="text/template"> -->
+          <!--     ## Lower bound or higher bound? -->
+          <!--     - We could use the same logic than before (narrow the type) -->
+          <!--     - But unintuitive results with implicit parameter list: -->
+          <!-- </script></section> -->
+          <section data-markdown><script type="text/template">
+              ## Rules for unsafe instantation
+              - If T is only constrained from below, instantiate from below
+              - If T is only constrained from above, instantiate from above
+              - If we're about to do an implicit search, instantiated from below
+              - otherwise use the normal rules
+          </script></section>
+          <section data-markdown><script type="text/template">
+          </script></section>
+          <section data-markdown><script type="text/template">
+          </script></section>
+        <!-- </section> -->
+      </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+      // More info https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        history: true,
+      slideNumber:'c/t',
+
+        // More info https://github.com/hakimel/reveal.js#dependencies
+        dependencies: [
+          { src: 'plugin/markdown/marked.js' },
+          { src: 'plugin/markdown/markdown.js' },
+          { src: 'plugin/notes/notes.js', async: true },
+          { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        ]
+      });
+    </script>
+  </body>
 </html>
