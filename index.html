@@ -61,14 +61,19 @@
 
               foo(1) // How is this typed?
               ```
-              Typing is done from left-to-right
+              <!-- .element: class="fragment" --> Typing is done from left-to-right, to type a type application:
               1. <!-- .element: class="fragment" --> Create a *type variable* for each missing type argument
-              2. <!-- .element: class="fragment" --> subtyping checks will constrain the type variable
-              3. <!-- .element: class="fragment" --> in the end, replace the type variable by a solution to the constraints
+              2. <!-- .element: class="fragment" --> Subtyping checks will constrain the type variable
+              3. <!-- .element: class="fragment" --> In the end, replace the type variable by a solution to the constraints
           </script></section>
           <section>
             <h2 id="typechecking">Typing example</h2>
             <p>
+              <pre><code data-trim class="scala">
+def foo[T](x: T): T = x
+
+foo(1) // How is this typed?
+              </code></pre>
               1. Typing <code>foo</code> creates a type variable <code>T?</code>
                <pre><code data-trim class="scala">
 foo[T?]
@@ -90,14 +95,18 @@ foo[Int](1)
           <!-- Things that we're not going to cover: add all constraints
                properly even if recursive, interactions with subtyping -->
 
-          <section data-markdown><script type="text/template">
+          <section data-markdown data-separator-notes="^Note:"><script type="text/template">
               ## The art of instantiaton
               - When should a type variable be instantiated?
                 - <!-- .element: class="fragment" --> as late as possible, to not miss constraints
                 - <!-- .element: class="fragment" --> but not too late, or typing is impossible
-              - <!-- .element: class="fragment" --> Instantiate to lower bound or higher bound?
-                - <!-- .element: class="fragment" --> Depends on where the type variable appear in the resulting type
-          </script></section>
+              - <!-- .element: class="fragment" --> Instantiate to lower bound or upper bound?
+                - <!-- .element: class="fragment" --> Depends on where the type variable appears in the resulting type
+
+              Note:
+              The secondary question is whether to instantiate to the lower bound or upper bound
+            </script>
+          </section>
           <!-- <section data-markdown><script type="text/template"> -->
           <!--     ## Safe instantiation -->
           <!--     ```scala -->
@@ -151,6 +160,16 @@ foo[T?](…) // T? >: Lo <: Hi
                   </tr>
                 </table>
               </p>
+              <aside class="notes">
+                In some cases instantiation is safe, by safe I mean that we can pick one solution
+                and be sure that it won't cause the rest of the program to fail to typecheck.<br>
+                Suppose that we have a method foo with a tparam T and some args (don't matter)
+                and some return type RetType<br>
+                Suppose that we have a call to foo used as a prefix to a call to some other method bar
+                Can we type foo with args before we type bar?<br>
+                depends<br>
+
+              </aside>
           </section>
           <section data-markdown><script type="text/template">
               ## The fear of `Nothing`
@@ -172,6 +191,14 @@ foo[T?](…) // T? >: Lo <: Hi
               def foo[T](x: Foo[T]) = x
               foo(new Foo[Nothing]) // error
               ```
+              <aside class="notes">
+                Don't want to talk too much about scalac because not an expert on the implementation.<br>
+                Interesting to compare approaches. Basically instantiates eagerly<br>
+                Not a big issue in scalac because dislikes Nothing<br>
+                fails if we specify a lower bound...<br>
+                other annoying thing is...<br>
+                All these examples work in dotty because instantiate as late as possible
+              </aside>
           </script></section>
           <section data-markdown><script type="text/template">
               ## Effect of instantiation order
@@ -192,22 +219,27 @@ foo[T?](…) // T? >: Lo <: Hi
                 (implicit ev: T1 =:= T2) = {}
               </code></pre> <!-- .element: class="fragment" -->
           </script></section>
-          <section data-markdown><script type="text/template">
+          <section data-markdown data-separator-notes="^Note:"><script type="text/template">
               ## When do we actually need to instantiate?
-              - When assigning a type to a `val` or `def`
-              - When typing a lambda expression
-              - Before performing an implicit search
+              A *fully defined type* (type that does not contain uninstantiated type variables) is required when:
+              - assigning a type to a `val` or `def`
+              - typing a lambda expression
+              - performing an implicit search
               - ...and a few other cases
+
+              Note:
+              I keep saying that we inst as late as possible but when is that exactly? There's a few cases...<br>
+              Local type inf, cannot have something written after a definition affects its type
           </script></section>
           <section data-markdown><script type="text/template">
               ## Typing lambdas
               ```scala
               def foo(x: Int => Int): Int = x(0)
               ```
-              `foo(x => x)` is desugared into:
+              `foo(x => x + 1)` is desugared into:
               ```scala
               foo({
-                def $anonfun(x: Int): Int = x
+                def $anonfun(x: Int): Int = x + 1
                 closure($anonfun)
               })
               ```
@@ -221,31 +253,44 @@ foo[T?](…) // T? >: Lo <: Hi
               app(1, (x: Int) => x) // OK in dotty and scalac
               app(1, x => x) // OK in dotty, error in scalac
               ```
+              1. <!-- .element: class="fragment" --> To type the lambda we need to fully define `T => T`
+              2. <!-- .element: class="fragment" --> So we need to instantiate `T? >: Int`
+              3. <!-- .element: class="fragment" --> We choose `T? = Int`
+              4. <!-- .element: class="fragment" --> So we don't need to annotate the lambda parameter
           </script></section>
           <section data-markdown><script type="text/template">
               ## Implicit search
               - Need fully-defined type of implicit value to search
+                - otherwise ambiguous implicits would be hard to avoid
               - <!-- .element: class="fragment" data-fragment-index="1" --> Narrowing does not hold:
 
               <pre class="fragment" data-fragment-index="1"><code data-trim class="scala">
-              class Contra[-T]
+              class Contra[-A]
               def tag[T](x: Contra[T])(implicit c: ClassTag[T]) = c
-              tag(new Contra[Int]) // we want T? = Int
+              tag(new Contra[Int]) // T? >: Nothing <: Int
+              // we want T? = Int, but our algorithm picks Nothing
               </code></pre>
 
               - <!-- .element: class="fragment" data-fragment-index="2" --> Intuitively, if the user constrains only one bound of a type variable, we should instantiate to that bound
           </script></section>
           <!-- <section data-markdown><script type="text/template"> -->
-          <!--     ## Lower bound or higher bound? -->
+          <!--     ## Lower bound or upper bound? -->
           <!--     - We could use the same logic than before (narrow the type) -->
           <!--     - But unintuitive results with implicit parameter list: -->
           <!-- </script></section> -->
           <section data-markdown><script type="text/template">
-              ## Rules for unsafe instantation
-              1. If `T`'s lower bound is constrained, instantiate to that lower bound
-              1. If `T`'s higher bound is constrained, instantiate to that higher bound
-              3. Otherwise, if we're about to do an implicit search, instantiate to the higher bound
-              4. Otherwise, same rules as safe instantiation based on variance in type
+              ## Fully defining a type `S`
+              Instantiate each type variable `T?` present in `S` as follow:
+              1. If only the lower bound of `T?` is constrained, use that
+              1. If only the upper bound of `T?` is constrained, use that
+              3. [Otherwise, if we're trying to fully define the type of an implicit value to search,
+                 use the lower bound](https://github.com/lampepfl/dotty/issues/878)
+              4. Otherwise, same rules as safe instantiation based on where `T?` appears in `S`
+          </script></section>
+          <section data-markdown><script type="text/template">
+              ## More info
+              - https://github.com/lampepfl/dotty/blob/master/src/dotty/tools/dotc/typer/Inferencing.scala
+              - Only 300 lines of code!
           </script></section>
         <!-- </section> -->
       </div>
