@@ -40,6 +40,16 @@
           <a href="http://guillaume.martres.me">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guillaume Martres</a> - EPFL
         </section>
         <!-- <section> -->
+          <section>
+            <h2>Takeaway message</h2>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hacking compilers is fun and profitable!
+          </section>
+          <section>
+            <img src="fixall.png">
+          </section>
+          <section>
+            <img src="si2712-hl.png" style="border: none;">
+          </section>
           <section data-markdown><script type="text/template">
               ## Type parameter inference
           </script></section>
@@ -83,7 +93,7 @@ foo[Int](1)
           <section data-markdown><script type="text/template">
               ## The art of instantiaton
               - When should a type variable be instantiated?
-                - <!-- .element: class="fragment" --> as late as possible, to not miss constraint
+                - <!-- .element: class="fragment" --> as late as possible, to not miss constraints
                 - <!-- .element: class="fragment" --> but not too late, or typing is impossible
               - <!-- .element: class="fragment" --> Instantiate to lower bound or higher bound?
                 - <!-- .element: class="fragment" --> Depends on where the type variable appear in the resulting type
@@ -137,7 +147,7 @@ foo[T?](…) // T? >: Lo <: Hi
                   <tr>
                     <td>co- <b>and</b> contravariantly<br> or invariantly</td>
                     <td class="fragment" data-fragment-index="7"><b>No</b></td>
-                    <td class="fragment" data-fragment-index="7">¯\_(ツ)_/¯</td>
+                    <td class="fragment" data-fragment-index="7"><code>¯\_(ツ)_/¯</code></td>
                   </tr>
                 </table>
               </p>
@@ -165,6 +175,8 @@ foo[T?](…) // T? >: Lo <: Hi
           </script></section>
           <section data-markdown><script type="text/template">
               ## Effect of instantiation order
+              - [Using multiple parameter lists to enforce type equality](http://stackoverflow.com/a/31192042/348497)
+
               ```scala
               class A
               class B
@@ -173,7 +185,12 @@ foo[T?](…) // T? >: Lo <: Hi
                 // error in scalac: found B, required A
                 // OK in dotty: T? = AnyRef
               ```
-              - <!-- .element: class="fragment" --> Please use `=:=` instead :)
+              - <!-- .element: class="fragment" --> Use `=:=` instead :)
+
+              <pre><code data-trim class="scala" data-noescape>
+              def same\[T1, T2\](x: T1, y: T2)
+                (implicit ev: T1 =:= T2) = {}
+              </code></pre> <!-- .element: class="fragment" -->
           </script></section>
           <section data-markdown><script type="text/template">
               ## When do we really need to instantiate?
@@ -195,7 +212,7 @@ foo[T?](…) // T? >: Lo <: Hi
               })
               ```
               - <!-- .element: class="fragment" --> To desugar a lambda we need its parameter types and return type
-              - <!-- .element: class="fragment" --> wAvoid inferring `Nothing` as a parameter type
+              - <!-- .element: class="fragment" --> (we avoid inferring `Nothing` as a parameter type)
           </script></section>
           <section data-markdown><script type="text/template">
               ## "As late as possible" might still be earlier than scalac
@@ -225,14 +242,10 @@ foo[T?](…) // T? >: Lo <: Hi
           <!-- </script></section> -->
           <section data-markdown><script type="text/template">
               ## Rules for unsafe instantation
-              - If T is only constrained from below, instantiate from below
-              - If T is only constrained from above, instantiate from above
-              - If we're about to do an implicit search, instantiated from below
-              - otherwise use the normal rules
-          </script></section>
-          <section data-markdown><script type="text/template">
-          </script></section>
-          <section data-markdown><script type="text/template">
+              1. If T is only constrained from below, instantiate from below
+              2. If T is only constrained from above, instantiate from above
+              3. Otherwise, if we're about to do an implicit search, instantiate from below
+              4. Otherwise, use the normal rules
           </script></section>
         <!-- </section> -->
       </div>
