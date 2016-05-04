@@ -70,18 +70,18 @@
             <h2 id="typechecking">Typing example</h2>
             <p>
               1. Typing <code>foo</code> creates a type variable <code>T?</code>
-               <pre><code data-trim>
+               <pre><code data-trim class="scala">
 foo[T?]
               </code></pre>
               <span class="fragment">
                 2. Typing <code>foo[T?](1)</code> adds a constraint to <code>T?</code>
-                <pre><code data-trim>
+                <pre><code data-trim class="scala">
 foo[T?](1) // T? &gt;: Int
                 </code></pre>
               </span>
               <span class="fragment">
                 3. Instantiating <code>T? = Int</code> respects the constraints
-                <pre><code data-trim>
+                <pre><code data-trim class="scala">
 foo[Int](1)
                 </code></pre>
               </span>
