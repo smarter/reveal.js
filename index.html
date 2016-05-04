@@ -76,7 +76,7 @@ foo[T?]
               <span class="fragment">
                 2. Typing <code>foo[T?](1)</code> adds a constraint to <code>T?</code>
                 <pre><code data-trim>
-foo[T?](1) // T? &lt;: Int
+foo[T?](1) // T? &gt;: Int
                 </code></pre>
               </span>
               <span class="fragment">
@@ -193,7 +193,7 @@ foo[T?](…) // T? >: Lo <: Hi
               </code></pre> <!-- .element: class="fragment" -->
           </script></section>
           <section data-markdown><script type="text/template">
-              ## When do we really need to instantiate?
+              ## When do we actually need to instantiate?
               - When assigning a type to a `val` or `def`
               - When typing a lambda expression
               - Before performing an implicit search
@@ -229,7 +229,7 @@ foo[T?](…) // T? >: Lo <: Hi
 
               <pre class="fragment" data-fragment-index="1"><code data-trim class="scala">
               class Contra[-T]
-              def tag[T](x: T)(implicit ct: ClassTag[T]) = ct
+              def tag[T](x: Contra[T])(implicit c: ClassTag[T]) = c
               tag(new Contra[Int]) // we want T? = Int
               </code></pre>
 
@@ -242,10 +242,10 @@ foo[T?](…) // T? >: Lo <: Hi
           <!-- </script></section> -->
           <section data-markdown><script type="text/template">
               ## Rules for unsafe instantation
-              1. If T is only constrained from below, instantiate from below
-              2. If T is only constrained from above, instantiate from above
-              3. Otherwise, if we're about to do an implicit search, instantiate from below
-              4. Otherwise, use the normal rules
+              1. If `T`'s lower bound is constrained, instantiate to that lower bound
+              1. If `T`'s higher bound is constrained, instantiate to that higher bound
+              3. Otherwise, if we're about to do an implicit search, instantiate to the higher bound
+              4. Otherwise, same rules as safe instantiation based on variance in type
           </script></section>
         <!-- </section> -->
       </div>
