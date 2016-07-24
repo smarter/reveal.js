@@ -173,7 +173,7 @@ foo[T?](…) // T? >: Lo <: Hi
           </section>
           <section data-markdown><script type="text/template">
               ## The fear of `Nothing`
-              - `scalac` instantiates eagerly, even when it isn't safe
+              - `scalac` instantiates eagerly after every parameter list, even when it isn't safe
               - <!-- .element: class="fragment" --> Counterbalanced by never inferring `Nothing`
               ```scala
               class Foo[T] { def put(x: T) = {} }
