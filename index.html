@@ -36,266 +36,374 @@
     <div class="reveal">
       <div class="slides">
         <section>
-          <h1>Dotty and types:<br> the story so far</h1>
+          <h1>Dotty tutorial</h1>
           <a href="http://guillaume.martres.me">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guillaume Martres</a> - EPFL
         </section>
-        <!-- <section> -->
-          <section>
-            <h2>Takeaway message</h2>
-            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Hacking compilers is fun and profitable!
-          </section>
-          <section>
-            <img src="fixall.png">
-          </section>
-          <section>
-            <img src="si2712-hl.png" style="border: none;">
-          </section>
-          <section data-markdown><script type="text/template">
-              ## Type parameter inference
-          </script></section>
-          <section data-markdown><script type="text/template">
-              ## Typing crash course
+        <section>
+        <section data-markdown data-separator-notes="^Note:" data-separator="^--"><script type="text/template">
+            ## What is Dotty?
+            - <!-- .element: class="fragment" --> A new, experimental compiler for Scala developed at EPFL
+            - <!-- .element: class="fragment" --> Type system internals redesigned, but externally very similar
+            --
+            ## A chance to redesign components
+            - <!-- .element: class="fragment" --> Rewritten sbt integration for incremental recompilation
+              - Eliminates several cases where sbt can "forget" to recompile a file
+            - <!-- .element: class="fragment" -->  New pattern matching exhaustiveness checker
+              - Should be faster and work better on edge cases
+            - <!-- .element: class="fragment" --> Some of these components may be ported back to Scala 2
+            --
+            ## Tooling support
+            - <!-- .element: class="fragment" --> [sbt integration, including incremental recompilation](https://github.com/smarter/dotty-example-project)
+            - <!-- .element: class="fragment" --> [Basic IntelliJ support (squiggly lines if you try to use Dotty features)](https://github.com/lampepfl/dotty/wiki/Using-Dotty-with-IntelliJ-IDEA)
+            - <!-- .element: class="fragment" --> A simple REPL (with color!)
+            - <!-- .element: class="fragment" --> No presentation compiler yet, so no integration with Eclipse, Ensime, etc.
+            --
+            ## The future
+            - Scala 2 will continue to evolve for a long time
+            - <!-- .element: class="fragment" --> Dotty won't be production-ready for at least a couple of years (hard to estimate)
+            - <!-- .element: class="fragment" --> Ideally, the two compilers should converge to make the transition as smooth as possible:
+              - Dotty has a compatibility mode: `-language:Scala2`
+              - Scala 2 will start implementing features prototyped in Dotty (trait parameters, ...)
+            --
+            ## Macros
+            - Scala 2 macros are too tied to the compiler internals
+            - <!-- .element: class="fragment" --> Long term plan: [`scala.meta`-based macros](https://github.com/scalameta/paradise)
+            - <!-- .element: class="fragment" --> Until then:
+              - <!-- .element: class="fragment" --> If it makes sense, implement popular macros as language features
+              - <!-- .element: class="fragment" --> Compiler plugins? (No API for that yet, you can help!)
+            --
+            ## Rewriting tool
+            - Dotty has a `-rewrite` option to fix code that relies on the Scala2 compatibility mode
+            - Plan is to expand this to cover as much cases as possible, like differences in type inference
+            --
+            # Dropped features
+            - Procedure syntax
+            - Early definitions
+            - Existential types written using `forSome`
+            --
+            ## <!-- .element: style="text-transform: none;" --> EXISTENTIAL TYPES WRITTEN USING `forSome`
+            - This syntax is no longer supported:
 
-              ```scala
+            ```scala
+            val x: Array[T] forSome { type T <: Foo } = ...
+            ```
+
+            - Can usually be rewritten using wildcards:
+
+            ```scala
+            val x: Array[_ <: Foo] = ...
+            ```
+            --
+            # Implemented features
+            --
+            ## Intersection and union types
+            - `A & B` is the *greatest lower bound*: a supertype of all subtypes of both `A` and `B`
+              - replaces compound type `A with B`
+            - `A | B` is the *least upper bound*: a subtype of all supertypes of both `A` and `B`
+            --
+            ## Intersection types replace compound types
+            ```scala
+            trait A
+            trait B
+            trait HasA { def get: A }
+            trait HasB { def get: B }
+            val x = new HasA with HasB {
+              def get = new A with B {}
+            }
+            ```
+
+            - <!-- .element: class="fragment" data-fragment-index="0" --> In Scala 2, the type of `x` is inferred to be:
+
+            ```scala
+            HasA with HasB { def get: A with B }
+            ```
+            <!-- .element: class="fragment" data-fragment-index="0" -->
+            - <!-- .element: class="fragment" --> In Dotty, this is just `A & B`
+            --
+            ## Pattern matching on a union type
+            ```scala
+            val x: Int | String = if (cond) 1 else "foo"
+            x match {
+              case x: Int => ...
+              case x: String => ...
+            }
+            ```
+            - <!-- .element: class="fragment" --> This is safe: if you forget a case in your match the compiler will warn you
+            --
+            ## Selection on a union type
+            ```scala
+            class A { def size: Int = ... }
+            class B { def size: Int = ... }
+            val x: A | B = ...
+            val y = x.size
+            ```
+            - <!-- .element: class="fragment" data-fragment-index="0" --> This is fast, the generated code is equivalent to:
+
+            ```scala
+            val x: AnyRef = ...
+            val y =
+              if (x.isInstanceOf[A])
+                x.asInstanceOf[A].size
+              else
+                x.asInstanceOf[B].size
+            ```
+            <!-- .element: class="fragment" data-fragment-index="0" -->
+            --
+            ## Type inference and union types
+            - By default, Dotty does not infer union types, they are approximated by a non-union supertype
+              - <!-- .element: class="fragment" --> Union types can be "too precise" and prevent legitimate code from compiling
+              - <!-- .element: class="fragment" --> Union types containing many alternatives (`A | B | C | ...`) can slow down compilation
+            - <!-- .element: class="fragment" --> For now, you can force the compiler to infer unions in a file by doing:
+            ```scala
+            import dotty.language.keepUnions
+            ```
+            --
+            ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
+            - Replace early definitions
+
+            ```scala
+            trait A {
+              val x: String
+              println(x)
+            }
+            class B extends A { val x = "b" }
+            new B // prints "null"
+
+            // Using an early definition
+            class C extends { val x: String = "c" } with A
+            new C // prints "c"
+            ```
+            --
+            ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
+            - Trait parameters are like class parameters (with some restrictions)
+
+            ```scala
+            trait A(x: String) {
+              println(x)
+            }
+            class B extends A("b")
+            new B // prints "b"
+            ```
+            --
+            ## Literal-based singleton types ([SIP-23](http://docs.scala-lang.org/sips/pending/42.type.html))
+            ```scala
+            val x: 1 = 1
+            ```
+            ```scala
+            val y: List[1 | String] = List("foo", 1, "bar")
+            ```
+            <!-- .element: class="fragment" -->
+            --
+            # Proposed features
+            - None of this has been implemented or even designed yet.
+            - <!-- .element: class="fragment" --> Effect system
+            - <!-- .element: class="fragment" --> Generic programming, like what Shapeless provides (abstract over case classes, ...)
+            - <!-- .element: class="fragment" --> Non-nullable types
+            --
+            ## Non-nullable types
+            - `null` has type `Null`
+            - <!-- .element: class="fragment" --> Currently: `Null` is a subtype of every non-value class
+            - <!-- .element: class="fragment" --> Proposal: `Null` is a subtype of no other type
+
+            ```scala
+            val x: String = null // This would be illegal
+            ```
+            <!-- .element: class="fragment" -->
+
+            ```scala
+            val x: String | Null = null // This is fine
+            ```
+            <!-- .element: class="fragment" -->
+
+            ```scala
+            val x: String? = null // Shorter syntax
+            ```
+            <!-- .element: class="fragment" -->
+            - <!-- .element: class="fragment" --> Going further: treat nullability as an effect
+              - <!-- .element: class="fragment" --> Can be turned on/off locally
+              - <!-- .element: class="fragment" --> Keep Java interop as smooth as possible
+        </script></section>
+        </section>
+        <section>
+				<section>
+					<h2>Dotty internals: the frontend</h2>
+          <h3>Generating trees and symbols and typing them</h3>
+				</section>
+				<section>
+				  <h2>The compiler pipeline</h2>
+          <img style="margin-left: 130px;" src="images/phases.png">
+        </section>
+				<section>
+				  <h2>Fundamental data structures</h2>
+          <ul>
+            <li>The compiler represents code
+            using <font color="#FF4136">trees</font></li>
+            <li>To ensure type-safety, we attach <font color="#FF4136">types</font> to trees</li>
+            <li>A type might refer to an identifier defined in a
+              tree or in the classpath, to each valid identifier
+              corresponds a <font color="#FF4136">symbol</font> looked
+              up in the symbol table for the current scope
+            <li>Each phase of the compiler pipeline simplifies the trees and types
+              until they can be easily expressed using Java bytecode</li>
+            <!-- XXX: Trees are transformed eagerly, types are transformed lazy
+                 (not all types used in one phase are necessary in the next) -->
+            <li>All of these data structures are immutable (or look immutable but use caching under the hood)</li>
+          </ul>
+        </section>
+				<section>
+				  <h2>Parser: From source file to Untyped Tree</h2>
+          <p>
+            <pre>obj.fun(5)</pre>
+            <pre><font color="#0074D9" class="fragment" data-fragment-index="1">obj</font><font color="#FFDC00" class="fragment" data-fragment-index="2">.fun</font><font color="#FF4136" class="fragment" data-fragment-index="3">(</font><font color="#2ECC40" class="fragment" data-fragment-index="4">5</font><font color="#FF4136" class="fragment" data-fragment-index="3">)</font></pre>
+            <pre><font color="#FF4136" class="fragment" data-fragment-index="3">Apply(</font><font color="#FFDC00" class="fragment" data-fragment-index="2">Select(</font><font color="#0074D9" class="fragment" data-fragment-index="1">Ident("obj")</font><font color="#FFDC00" class="fragment" data-fragment-index="2">, "fun")</font><font color="#FF4136" class="fragment" data-fragment-index="3">, </font><font color="#2ECC40" class="fragment" data-fragment-index="4">Literal(5)</font><font color="#FF4136" class="fragment" data-fragment-index="3">)</font></pre>
+          </p>
+        </section>
+        <section data-markdown data-separator-notes="^Note:" data-separator="^--"><script type="text/template">
+            ## Scala's typing algorithm (heavily simplified)
+
+            - Recursively type subtrees, remembering the expected type
+            - <!-- .element: class="fragment" --> type `obj.fun(5)` with expected type `?`
+              - <!-- .element: class="fragment" --> type `obj.fun` with expected type `? => ?`
+                - <!-- .element: class="fragment" --> type `obj` with expected type `{ fun: ? => ? }`
+                - <!-- .element: class="fragment" --> Assign type to `obj.fun` based on type of `obj`
+              - <!-- .element: class="fragment" --> type `5` where the expected type is the parameter type of `obj.fun`
+              - <!-- .element: class="fragment" --> Assign type to `obj.fun(5)` based on type of `obj.fun` and `5`
+            --
+            ## Purpose of expected type
+            - <!-- .element: class="fragment" --> Infer type parameters
+              - <!-- .element: class="fragment" --> See [Dotty and Types: The Story so far](https://www.youtube.com/watch?v=YIQjfCKDR5A) for more details
+            - <!-- .element: class="fragment" -->  If the actual type does not match the expected type:
+              - <!-- .element: class="fragment" --> Try to adapt (eta-expansion, implicit conversion, ...)
+              - <!-- .element: class="fragment" --> If that fails, replace the type by an `ErrorType` and move on
+            --
+            ## A symbol represents a definition in a scope
+            ```scala
+            class A {
               def foo[T](x: T): T = x
+            }
+            ```
+            - <!-- .element: class="fragment" --> We create a symbol in a different scope for each of `A`, `foo` and
+            `x`
+            - <!-- .element: class="fragment" --> What is the type of the symbol of `x`?
+              - <!-- .element: class="fragment" --> If we choose `T`, then we need to mutate the symbol after
+            `Erasure`, since `T` will be transformed to `Object`
+              - <!-- .element: class="fragment" --> But symbols and types should be immutable
+            --
+            ## Representing time
+            - Each phase can be seen as an instant of time
+            - <!-- .element: class="fragment" --> A `Period` is an interval of time
+              - <!-- .element: class="fragment" --> `T` is a valid type for `x` starting from the `Frontend` phase
+            until the `Erasure` phase
+            - <!-- .element: class="fragment" --> A symbol does not have a type, instead it has a time-dependent
+            `denotation`
+            --
+            ## denotations are circular linked list of lazily computed types
+            ![](images/den2.png) <!-- .element style="background:none; border:none; box-shadow:none;" -->
+            - <!-- .element: class="fragment" --> Lazy because not all denotations are needed at all periods
+            - <!-- .element: class="fragment" --> Circular because we sometimes need to travel back in time
+            --
+            ## References
+            ```scala
+            class A[T] {
+              val elem: List[T] = Nil
+            }
+            val x = new A[Int]
+            ```
+            - What is the type of `x.elem` ?
+            - <!-- .element: class="fragment" --> It's not the type of the symbol `elem`, that's `List[T]` but we want `List[Int]`
+            - <!-- .element: class="fragment" --> We want the type of `elem` *as seen from* the prefix `x`
+            <!-- - `List[Int]` is not a good answer, after the `Erasure` phase, -->
+            <!--   `x.elem` has the erased type `List` -->
+            <!-- - We need a type to represent the member `elem` of `x`, this type is -->
+            <!-- a *reference* to another type -->
 
-              foo(1) // How is this typed?
-              ```
-              <!-- .element: class="fragment" --> Typing is done from left-to-right, to type a type application:
-              1. <!-- .element: class="fragment" --> Create a *type variable* for each missing type argument
-              2. <!-- .element: class="fragment" --> Subtyping checks will constrain the type variable
-              3. <!-- .element: class="fragment" --> In the end, replace the type variable by a solution to the constraints
-          </script></section>
-          <section>
-            <h2 id="typechecking">Typing example</h2>
-            <p>
-              <pre><code data-trim class="scala">
-def foo[T](x: T): T = x
+            --
 
-foo(1) // How is this typed?
-              </code></pre>
-              1. Typing <code>foo</code> creates a type variable <code>T?</code>
-               <pre><code data-trim class="scala">
-foo[T?]
-              </code></pre>
-              <span class="fragment">
-                2. Typing <code>foo[T?](1)</code> adds a constraint to <code>T?</code>
-                <pre><code data-trim class="scala">
-foo[T?](1) // T? &gt;: Int
-                </code></pre>
-              </span>
-              <span class="fragment">
-                3. Instantiating <code>T? = Int</code> respects the constraints
-                <pre><code data-trim class="scala">
-foo[Int](1)
-                </code></pre>
-              </span>
-            </p>
-          </section>
-          <!-- Things that we're not going to cover: add all constraints
-               properly even if recursive, interactions with subtyping -->
+            ## References
+            ```scala
+            // Subclasses of Type
+            class TermRef(prefix: Type, name: TermName) extends …
+            class TypeRef(prefix: Type, name: TypeName) extends …
+            ```
+            - <!-- .element: class="fragment" --> `x.elem` has type `TermRef(TermRef(NoPrefix, "x"), "elem")`, this
+            type is always valid
+            --
 
-          <section data-markdown data-separator-notes="^Note:"><script type="text/template">
-              ## The art of instantiaton
-              - When should a type variable be instantiated?
-                - <!-- .element: class="fragment" --> as late as possible, to not miss constraints
-                - <!-- .element: class="fragment" --> but not too late, or typing is impossible
-              - <!-- .element: class="fragment" --> Instantiate to lower bound or upper bound?
-                - <!-- .element: class="fragment" --> Depends on where the type variable appears in the resulting type
+            ## References also have denotations
+            ![](images/den3.png) <!-- .element style="background:none; border:none; box-shadow:none;" -->
+            --
+        </script></section>
+        </section>
+        <section>
+	      <section>
+		      <h2>Dotty internals: the middle-end</h2>
+          <h3>Simplifing types and trees with successive transformations</h3>
+        </section>
 
-              Note:
-              The secondary question is whether to instantiate to the lower bound or upper bound
-            </script>
-          </section>
-          <!-- <section data-markdown><script type="text/template"> -->
-          <!--     ## Safe instantiation -->
-          <!--     ```scala -->
-          <!--       foo[T?](…) // T? >: Lo <: Hi -->
-          <!--         .bar(…) -->
-          <!--     ``` -->
-          <!--     - Can we instantiate `T?` right after typing `foo[T?](…)` ? -->
-          <!--     - <\!-- .element: class="fragment" -\-> It depends on where `T` appears in `RetType`: -->
-          <!--       - <\!-- .element: class="fragment" -\-> Not present: any bound is safe -->
-          <!--       - <\!-- .element: class="fragment" -\-> Only covariantly: `T? = Lo` is safe -->
-          <!--       - <\!-- .element: class="fragment" -\-> Only contravariantly: `T? = Hi` is safe -->
-          <!--       - <\!-- .element: class="fragment" -\-> Otherwise, we can't. -->
-          <!-- </script></section> -->
-          <section>
-              <h2>Safe instantiation</h2>
-              <p>
-                <pre><code class="scala" data-trim>
-def foo[T](…): RetType = …
-foo[T?](…) // T? >: Lo <: Hi
-  .bar(…)
-                </code></pre>
-                <ul>
-                  <li class="fragment" data-fragment-index="1">Can we instantiate <code>T?</code> right after typing <code>foo[T?](…)</code> ?</li>
-                  <li class="fragment" data-fragment-index="2">It depends on where <code>T</code> appears in <code>RetType</code></li>
-                </ul>
-                <table class="fragment" data-fragment-index="3">
-                  <tr>
-                    <td><code>T</code> appears</td>
-                    <td>Safe?</td>
-                    <td><code>T? =</code></td>
-                  </tr>
-                  <tr>
-                    <td>nowhere</td>
-                    <td class="fragment" data-fragment-index="4">Yes</td>
-                    <td class="fragment" data-fragment-index="4">Lo (arbitrarily)</td>
-                  </tr>
-                  <tr>
-                    <td>covariantly</td>
-                    <td class="fragment" data-fragment-index="5">Yes</td>
-                    <td class="fragment" data-fragment-index="5">Lo</td>
-                  </tr>
-                  <tr>
-                    <td>contravariantly</td>
-                    <td class="fragment" data-fragment-index="6">Yes</td>
-                    <td class="fragment" data-fragment-index="6">Hi</td>
-                  </tr>
-                  <tr>
-                    <td>co- <b>and</b> contravariantly<br> or invariantly</td>
-                    <td class="fragment" data-fragment-index="7"><b>No</b></td>
-                    <td class="fragment" data-fragment-index="7"><code>¯\_(ツ)_/¯</code></td>
-                  </tr>
-                </table>
-              </p>
-              <aside class="notes">
-                In some cases instantiation is safe, by safe I mean that we can pick one solution
-                and be sure that it won't cause the rest of the program to fail to typecheck.<br>
-                Suppose that we have a method foo with a tparam T and some args (don't matter)
-                and some return type RetType<br>
-                Suppose that we have a call to foo used as a prefix to a call to some other method bar
-                Can we type foo with args before we type bar?<br>
-                depends<br>
+        <section data-markdown>
+          <script type="text/template">
+            ## Transformation example: ElimRepeated
 
-              </aside>
-          </section>
-          <section data-markdown><script type="text/template">
-              ## The fear of `Nothing`
-              - `scalac` instantiates eagerly after every parameter list, even when it isn't safe
-              - <!-- .element: class="fragment" --> Counterbalanced by never inferring `Nothing`
-              ```scala
-              class Foo[T] { def put(x: T) = {} }
-              (new Foo).put("") // T? = String
-              ```
-              - <!-- .element: class="fragment" --> Fails if the lower bound isn't `Nothing`
-              ```scala
-              class Foo[T >: Null] { def put(x: T) = {} }
-              (new Foo).put("") // T? = Null
-                // type mismatch: Null does not match String
-              ```
-              - <!-- .element: class="fragment" --> Sometimes you really want to infer Nothing!
-              ```scala
-              class Foo[T]
-              def foo[T](x: Foo[T]) = x
-              foo(new Foo[Nothing]) // error
-              ```
-              <aside class="notes">
-                Don't want to talk too much about scalac because not an expert on the implementation.<br>
-                Interesting to compare approaches. Basically instantiates eagerly<br>
-                Not a big issue in scalac because dislikes Nothing<br>
-                fails if we specify a lower bound...<br>
-                other annoying thing is...<br>
-                All these examples work in dotty because instantiate as late as possible
-              </aside>
-          </script></section>
-          <section data-markdown><script type="text/template">
-              ## Effect of instantiation order
-              - [Using multiple parameter lists to enforce type equality](http://stackoverflow.com/a/31192042/348497)
-
-              ```scala
-              class A
-              class B
-              def same[T](x: T)(y: T) = {}
-              same(new A)(new B)
-                // error in scalac: found B, required A
-                // OK in dotty: T? = AnyRef
-              ```
-              - <!-- .element: class="fragment" --> Use `=:=` instead :)
-
-              <pre><code data-trim class="scala" data-noescape>
-              def same\[T1, T2\](x: T1, y: T2)
-                (implicit ev: T1 =:= T2) = {}
-              </code></pre> <!-- .element: class="fragment" -->
-          </script></section>
-          <section data-markdown data-separator-notes="^Note:"><script type="text/template">
-              ## When do we actually need to instantiate?
-              A *fully defined type* (type that does not contain uninstantiated type variables) is required when:
-              - assigning a type to a `val` or `def`
-              - typing a lambda expression
-              - performing an implicit search
-              - ...and a few other cases
-
-              Note:
-              I keep saying that we inst as late as possible but when is that exactly? There's a few cases...<br>
-              Local type inf, cannot have something written after a definition affects its type
-          </script></section>
-          <section data-markdown><script type="text/template">
-              ## Typing lambdas
-              ```scala
-              def foo(x: Int => Int): Int = x(0)
-              ```
-              `foo(x => x + 1)` is desugared into:
-              ```scala
-              foo({
-                def $anonfun(x: Int): Int = x + 1
-                closure($anonfun)
-              })
-              ```
-              - <!-- .element: class="fragment" --> To desugar a lambda we need its parameter types and return type
-              - <!-- .element: class="fragment" --> (we avoid inferring `Nothing` as a parameter type)
-          </script></section>
-          <section data-markdown><script type="text/template">
-              ## "As late as possible" might still be earlier than scalac
-              ```scala
-              def app[T](x: T, y: T => T) = y(x)
-              app(1, (x: Int) => x) // OK in dotty and scalac
-              app(1, x => x) // OK in dotty, error in scalac
-              ```
-              1. <!-- .element: class="fragment" --> To type the lambda we need to fully define `T => T`
-              2. <!-- .element: class="fragment" --> So we need to instantiate `T? >: Int`
-              3. <!-- .element: class="fragment" --> We choose `T? = Int`
-              4. <!-- .element: class="fragment" --> So we don't need to annotate the lambda parameter
-          </script></section>
-          <section data-markdown><script type="text/template">
-              ## Implicit search
-              - Need fully-defined type of implicit value to search
-                - otherwise ambiguous implicits would be hard to avoid
-              - <!-- .element: class="fragment" data-fragment-index="1" --> Narrowing does not hold:
-
-              <pre class="fragment" data-fragment-index="1"><code data-trim class="scala">
-              class Contra[-A]
-              def tag[T](x: Contra[T])(implicit c: ClassTag[T]) = c
-              tag(new Contra[Int]) // T? >: Nothing <: Int
-              // we want T? = Int, but our algorithm picks Nothing
-              </code></pre>
-
-              - <!-- .element: class="fragment" data-fragment-index="2" --> Intuitively, if the user constrains only one bound of a type variable, we should instantiate to that bound
-          </script></section>
-          <!-- <section data-markdown><script type="text/template"> -->
-          <!--     ## Lower bound or upper bound? -->
-          <!--     - We could use the same logic than before (narrow the type) -->
-          <!--     - But unintuitive results with implicit parameter list: -->
-          <!-- </script></section> -->
-          <section data-markdown><script type="text/template">
-              ## Fully defining a type `S`
-              Instantiate each type variable `T?` present in `S` as follow:
-              1. If only the lower bound of `T?` is constrained, use that
-              1. If only the upper bound of `T?` is constrained, use that
-              3. [Otherwise, if we're trying to fully define the type of an implicit value to search,
-                 use the lower bound](https://github.com/lampepfl/dotty/issues/878)
-              4. Otherwise, same rules as safe instantiation based on where `T?` appears in `S`
-          </script></section>
-          <section data-markdown><script type="text/template">
-              ## More info
-              - https://github.com/lampepfl/dotty/blob/master/src/dotty/tools/dotc/typer/Inferencing.scala
-              - Only 300 lines of code!
-          </script></section>
-        <!-- </section> -->
+            - Type transformation: `T*` becomes `Seq[T]`
+            - Tree transformation: `foo("one", "two")` becomes `foo(Seq("one", "two"))`
+          </script>
+        </section>
+	      <section>
+          <h3>Traditional phase design</h3>
+          <h4>1 phase = 1 full traversal</h4>
+        </section>
+        <section data-transition="none-out">
+		      <img src="images/mini1.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/mini2.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/mini3.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/mini4.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/mini5.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/mini6.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/mini7.png">
+        </section>
+	      <section>
+          <h3>Mini-phase design</h3>
+          <h4>N fused mini-phases = 1 full traversal</h4>
+        </section>
+        <section data-transition="none-out">
+		      <img src="images/mini1.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/minib2.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/minib3.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/minib4.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/minib5.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/minib6.png">
+        </section>
+        <section data-transition="none">
+		      <img src="images/minib7.png">
+        </section>
+        </section>
+        <section>
+          <h2>Demo time!</h2>
+        </section>
       </div>
     </div>
-
     <script src="lib/js/head.min.js"></script>
     <script src="js/reveal.js"></script>
 
