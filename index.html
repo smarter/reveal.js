@@ -30,6 +30,15 @@
       pre {
         font-size: 27px !important;
       }
+      .footer {
+        background-color: black;
+        width: 100% !important;
+        height: 2em !important;
+        line-height: 1em !important;
+        font-size: 92% !important;
+        position: fixed !important;
+        top: calc(100% - 2.5em) !important;
+      }
     </style>
   </head>
   <body>
@@ -47,6 +56,9 @@
             ## What is Dotty?
             - <!-- .element: class="fragment" --> A new, experimental compiler for Scala developed at EPFL
             - <!-- .element: class="fragment" --> Type system internals redesigned, but externally very similar
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## A chance to redesign components
             - <!-- .element: class="fragment" --> Rewritten sbt integration for incremental recompilation
@@ -54,12 +66,18 @@
             - <!-- .element: class="fragment" -->  New pattern matching exhaustiveness checker
               - Should be faster and work better on edge cases
             - <!-- .element: class="fragment" --> Some of these components may be ported back to Scala 2
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Tooling support
             - <!-- .element: class="fragment" --> [sbt integration, including incremental recompilation](https://github.com/smarter/dotty-example-project)
             - <!-- .element: class="fragment" --> [Basic IntelliJ support (squiggly lines if you try to use Dotty features)](https://github.com/lampepfl/dotty/wiki/Using-Dotty-with-IntelliJ-IDEA)
             - <!-- .element: class="fragment" --> A simple REPL (with color!)
             - <!-- .element: class="fragment" --> No presentation compiler yet, so no integration with Eclipse, Ensime, etc.
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## The future
             - Scala 2 will continue to evolve for a long time
@@ -67,6 +85,9 @@
             - <!-- .element: class="fragment" --> Ideally, the two compilers should converge to make the transition as smooth as possible:
               - Dotty has a compatibility mode: `-language:Scala2`
               - Scala 2 will start implementing features prototyped in Dotty (trait parameters, ...)
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Macros
             - Scala 2 macros are too tied to the compiler internals
@@ -74,15 +95,27 @@
             - <!-- .element: class="fragment" --> Until then:
               - <!-- .element: class="fragment" --> If it makes sense, implement popular macros as language features
               - <!-- .element: class="fragment" --> Compiler plugins? (No API for that yet, you can help!)
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Rewriting tool
             - Dotty has a `-rewrite` option to fix code that relies on the Scala2 compatibility mode
             - Plan is to expand this to cover as much cases as possible, like differences in type inference
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             # Dropped features
             - Procedure syntax
             - Early definitions
             - Existential types written using `forSome`
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## <!-- .element: style="text-transform: none;" --> EXISTENTIAL TYPES WRITTEN USING `forSome`
             - This syntax is no longer supported:
@@ -96,13 +129,22 @@
             ```scala
             val x: Array[_ <: Foo] = ...
             ```
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             # Implemented features
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Intersection and union types
             - `A & B` is the *greatest lower bound*: a supertype of all subtypes of both `A` and `B`
               - replaces compound type `A with B`
             - `A | B` is the *least upper bound*: a subtype of all supertypes of both `A` and `B`
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Intersection types replace compound types
             ```scala
@@ -122,6 +164,9 @@
             ```
             <!-- .element: class="fragment" data-fragment-index="0" -->
             - <!-- .element: class="fragment" --> In Dotty, this is just `HasA & HasB`
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Pattern matching on a union type
             ```scala
@@ -132,6 +177,9 @@
             }
             ```
             - <!-- .element: class="fragment" --> This is safe: if you forget a case in your match the compiler will warn you
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Selection on a union type
             ```scala
@@ -151,6 +199,9 @@
                 x.asInstanceOf[B].size
             ```
             <!-- .element: class="fragment" data-fragment-index="0" -->
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Type inference and union types
             - By default, Dotty does not infer union types, they are approximated by a non-union supertype
@@ -160,6 +211,9 @@
             ```scala
             import dotty.language.keepUnions
             ```
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
             - Replace early definitions
@@ -176,6 +230,9 @@
             class C extends { val x: String = "c" } with A
             new C // prints "c"
             ```
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
             - Trait parameters are like class parameters (with some restrictions)
@@ -187,6 +244,9 @@
             class B extends A("b")
             new B // prints "b"
             ```
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Literal-based singleton types ([SIP-23](http://docs.scala-lang.org/sips/pending/42.type.html))
             ```scala
@@ -196,12 +256,18 @@
             val y: List[1 | String] = List("foo", 1, "bar")
             ```
             <!-- .element: class="fragment" -->
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             # Proposed features
             - None of this has been implemented or even designed yet.
             - <!-- .element: class="fragment" --> Effect system
             - <!-- .element: class="fragment" --> Generic programming, like what Shapeless provides (abstract over case classes, ...)
             - <!-- .element: class="fragment" --> Non-nullable types
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Non-nullable types
             - `null` has type `Null`
@@ -271,6 +337,9 @@
                 - <!-- .element: class="fragment" --> Assign type to `obj.fun` based on type of `obj`
               - <!-- .element: class="fragment" --> type `5` where the expected type is the parameter type of `obj.fun`
               - <!-- .element: class="fragment" --> Assign type to `obj.fun(5)` based on type of `obj.fun` and `5`
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Purpose of expected type
             - <!-- .element: class="fragment" --> Infer type parameters
@@ -278,6 +347,9 @@
             - <!-- .element: class="fragment" -->  If the actual type does not match the expected type:
               - <!-- .element: class="fragment" --> Try to adapt (eta-expansion, implicit conversion, ...)
               - <!-- .element: class="fragment" --> If that fails, replace the type by an `ErrorType` and move on
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## A symbol represents a definition in a scope
             ```scala
@@ -291,6 +363,9 @@
               - <!-- .element: class="fragment" --> If we choose `T`, then we need to mutate the symbol after
             `Erasure`, since `T` will be transformed to `Object`
               - <!-- .element: class="fragment" --> But symbols and types should be immutable
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## Representing time
             - Each phase can be seen as an instant of time
@@ -299,11 +374,17 @@
             until the `Erasure` phase
             - <!-- .element: class="fragment" --> A symbol does not have a type, instead it has a time-dependent
             `denotation`
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## denotations are circular linked list of lazily computed types
             ![](images/den2.png) <!-- .element style="background:none; border:none; box-shadow:none;" -->
             - <!-- .element: class="fragment" --> Lazy because not all denotations are needed at all periods
             - <!-- .element: class="fragment" --> Circular because we sometimes need to travel back in time
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
             ## References
             ```scala
@@ -320,6 +401,9 @@
             <!-- - We need a type to represent the member `elem` of `x`, this type is -->
             <!-- a *reference* to another type -->
 
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
 
             ## References
@@ -330,10 +414,16 @@
             ```
             - <!-- .element: class="fragment" --> `x.elem` has type `TermRef(TermRef(NoPrefix, "x"), "elem")`, this
             type is always valid
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
 
             ## References also have denotations
             ![](images/den3.png) <!-- .element style="background:none; border:none; box-shadow:none;" -->
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
             --
         </script></section>
         </section>
