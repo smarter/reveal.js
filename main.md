@@ -122,6 +122,25 @@ JapaneseTranslationGoesHere
 JapaneseTranslationGoesHere
 <!-- .element: class="footer" -->
 --
+## Improved type inference
+```scala
+def ap1[A,B](a: A)(f: A => B): B = f(a)
+def ap2[A,B](a: A, f: A => B): B = f(a)
+
+```
+<!-- .element: class="fragment" -->
+```scala
+ap1(1)(x => x * 2) // Compiles with Scala2 and Dotty
+ap2(1, x => x * 2) // Only compiles with Dotty
+
+```
+<!-- .element: class="fragment" -->
+
+-  <!-- .element: class="fragment" --> See the talk [Dotty and Types: The Story So Far](http://guillaume.martres.me/talks/typelevel-summit-oslo/#/) for more details
+
+JapaneseTranslationGoesHere
+<!-- .element: class="footer" -->
+--
 ## Functions with very many parameters
 - <!-- .element: class="fragment" --> Standard library contains classes `Function1`, `Function2`, ..., `Function22`
 - <!-- .element: class="fragment" --> New in Dotty: If function has
