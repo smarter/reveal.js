@@ -44,91 +44,119 @@
   <body>
     <div class="reveal">
       <div class="slides">
-        <section>
-          <h1>Dotty tutorial</h1>
-          <a href="http://guillaume.martres.me">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guillaume Martres</a> - EPFL
-          <br>
-          <br>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/smarter/dotty-tutorial">https://github.com/smarter/dotty-tutorial</a>
-        </section>
-        <section>
         <section data-markdown data-separator-notes="^Note:" data-separator="^--"><script type="text/template">
+            # The State of Dotty
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Guillaume Martres](http://guillaume.martres.me) - EPFL
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+            --
+            ## What is DOT?
+            - <!-- .element: class="fragment" --> Theoretical foundations for Scala
+            - <!-- .element: class="fragment" --> Goal: prove Scala type system is sound
+              - <!-- .element: class="fragment" --> If code compiles and does not use unsafe features, no `ClassCastException`
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+            --
             ## What is Dotty?
             - <!-- .element: class="fragment" --> A new, experimental compiler for Scala developed at EPFL
-            - <!-- .element: class="fragment" --> Type system internals redesigned, but externally very similar
+            - <!-- .element: class="fragment" --> Type system internals redesigned, inspired by DOT, but externally very similar
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
             ## A chance to redesign components
-            - <!-- .element: class="fragment" --> Rewritten sbt integration for incremental recompilation
-              - Eliminates several cases where sbt can "forget" to recompile a file
-            - <!-- .element: class="fragment" -->  New pattern matching exhaustiveness checker
-              - Should be faster and work better on edge cases
+            - <!-- .element: class="fragment" --> Improved incremental compilation
+            - <!-- .element: class="fragment" -->  Better pattern matching checks
             - <!-- .element: class="fragment" --> Some of these components may be ported back to Scala 2
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
-            ## Tooling support
-            - <!-- .element: class="fragment" --> [sbt integration, including incremental recompilation](https://github.com/smarter/dotty-example-project)
-            - <!-- .element: class="fragment" --> [Basic IntelliJ support (squiggly lines if you try to use Dotty features)](https://github.com/lampepfl/dotty/wiki/Using-Dotty-with-IntelliJ-IDEA)
-            - <!-- .element: class="fragment" --> A simple REPL (with color!)
-            - <!-- .element: class="fragment" --> No presentation compiler yet, so no integration with Eclipse, Ensime, etc.
+            ## Tooling
+            A good developer experience requires good tools:
+            - <!-- .element: class="fragment" --> A simple REPL (with syntax highlighting!)
+            - <!-- .element: class="fragment" --> Dottydoc
+            - <!-- .element: class="fragment" --> IDE support using the [Language Server Protocol](https://github.com/Microsoft/language-server-protocol) (Visual Studio Code, Eclipse, ...)
+            - <!-- .element: class="fragment" --> See Felix's talk tomorrow for more details!
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
+            --
+            ## The Dotty Linker
+            - <!-- .element: class="fragment" --> Call-graph analysis enables many global optimizations:
+              - <!-- .element: class="fragment" --> Dead Code Elimination
+              - <!-- .element: class="fragment" --> Automatic specialization (no more `@specialize` !)
+              - <!-- .element: class="fragment" --> See [Dmitry's ScalaDays talk](https://www.youtube.com/watch?v=h8KBLF0AgUc)
             --
             ## The future
-            - Scala 2 will continue to evolve for a long time
-            - <!-- .element: class="fragment" --> Dotty won't be production-ready for at least a couple of years (hard to estimate)
-            - <!-- .element: class="fragment" --> Ideally, the two compilers should converge to make the transition as smooth as possible:
-              - Dotty has a compatibility mode: `-language:Scala2`
-              - Scala 2 will start implementing features prototyped in Dotty (trait parameters, ...)
+            - <!-- .element: class="fragment" --> First Technology Preview release of Dotty soon!
+            - <!-- .element: class="fragment" --> Scala 2 will continue to evolve for a long time
+            - <!-- .element: class="fragment" --> Convergence:
+              - <!-- .element: class="fragment" --> Compatibility mode in Dotty for deprecated features
+              - <!-- .element: class="fragment" --> Scala 2 will start implementing features prototyped in Dotty (trait parameters, ...)
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
-            ## Macros
-            - Scala 2 macros are too tied to the compiler internals
-            - <!-- .element: class="fragment" --> Long term plan: [`scala.meta`-based macros](https://github.com/scalameta/paradise)
-            - <!-- .element: class="fragment" --> Until then:
-              - <!-- .element: class="fragment" --> If it makes sense, implement popular macros as language features
-              - <!-- .element: class="fragment" --> Compiler plugins? (No API for that yet, you can help!)
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## Rewriting tool
-            - Dotty has a `-rewrite` option to fix code that relies on the Scala2 compatibility mode
-            - Plan is to expand this to cover as much cases as possible, like differences in type inference
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
+            ## Migrating code
+            - Some Scala 2 code may not work well with Dotty:
+              - <!-- .element: class="fragment" --> Dropped features
+              - <!-- .element: class="fragment" --> Differences in type inference
+            - <!-- .element: class="fragment" --> [Scalafix](https://github.com/scalacenter/scalafix) automatically rewrites your code to ease migration
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
             # Dropped features
-            - Procedure syntax
-            - Early definitions
-            - Existential types written using `forSome`
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
-            ## <!-- .element: style="text-transform: none;" --> EXISTENTIAL TYPES WRITTEN USING `forSome`
-            - This syntax is no longer supported:
+            ## Macros
+            - <!-- .element: class="fragment" --> Scala 2 macros are too tied to the compiler internals
+            - <!-- .element: class="fragment" --> New macro system: [`scala.meta`](https://github.com/scalacenter/scalafix)
+              - <!-- .element: class="fragment" --> Easier to use, more typesafe
+              - <!-- .element: class="fragment" --> Should support both Scala 2 and Dotty
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+            --
+            ## Procedure syntax
+            - <!-- .element: class="fragment" --> Instead of writing:
+
+            ```scala
+            def foo() {
+              ...
+            }
+            ```
+            <!-- .element: class="fragment" -->
+            - <!-- .element: class="fragment" --> You should write:
+
+            ```scala
+            def foo(): Unit = {
+              ...
+            }
+            ```
+            <!-- .element: class="fragment" -->
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+            --
+            ## <!-- .element: style="text-transform: none;" --> `forSome`
+            - <!-- .element: class="fragment" --> This syntax is no longer supported:
 
             ```scala
             val x: Array[T] forSome { type T <: Foo } = ...
             ```
-
-            - Can usually be rewritten using wildcards:
+            <!-- .element: class="fragment" -->
+            - <!-- .element: class="fragment" --> Can usually be rewritten using wildcards:
 
             ```scala
             val x: Array[_ <: Foo] = ...
             ```
+            <!-- .element: class="fragment" -->
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
@@ -138,39 +166,38 @@
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
-            ## Intersection and union types
-            - `A & B` is the *greatest lower bound*: a supertype of all subtypes of both `A` and `B`
-              - replaces compound type `A with B`
-            - `A | B` is the *least upper bound*: a subtype of all supertypes of both `A` and `B`
+            ## Functions with very many parameters
+            - <!-- .element: class="fragment" --> Standard library contains classes `Function1`, `Function2`, ..., `Function22`
+            - <!-- .element: class="fragment" --> New in Dotty: If function has
+              too many parameters, use `FunctionXXL` which takes an array of
+              parameters.
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
-            ## Intersection types replace compound types
-            ```scala
-            trait A
-            trait B
-            trait HasA { def get: A }
-            trait HasB { def get: B }
-            val x = new HasA with HasB {
-              def get = new A with B {}
-            }
-            ```
+            ## Intersection types
+            - <!-- .element: class="fragment" --> A value has type `A & B` if it has both type `A` and type `B`
+              - <!-- .element: class="fragment" --> replaces `A with B`
 
-            - <!-- .element: class="fragment" data-fragment-index="0" --> In Scala 2, the type of `x` is inferred to be:
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+            --
+            ## Union types
+            - <!-- .element: class="fragment" --> A value has type `A | B` if it has type `A` or type `B`
 
             ```scala
-            HasA with HasB { def get: A with B }
+            val foo = if (cond) 1 else "test"
             ```
-            <!-- .element: class="fragment" data-fragment-index="0" -->
-            - <!-- .element: class="fragment" --> In Dotty, this is just `HasA & HasB`
+            <!-- .element: class="fragment" -->
+            - <!-- .element: class="fragment" --> In Scala 2: `foo` has type `Any`
+            - <!-- .element: class="fragment" --> In Dotty: `foo` has type `Int | String`
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
             ## Pattern matching on a union type
             ```scala
-            val x: Int | String = if (cond) 1 else "foo"
+            val x = if (cond) 1 else "foo"
             x match {
               case x: Int => ...
               case x: String => ...
@@ -181,43 +208,7 @@
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
-            ## Selection on a union type
-            ```scala
-            class A { def size: Int = ... }
-            class B { def size: Int = ... }
-            val x: A | B = ...
-            val y = x.size
-            ```
-            - <!-- .element: class="fragment" data-fragment-index="0" --> This is fast, the generated code is equivalent to:
-
-            ```scala
-            val x: AnyRef = ...
-            val y =
-              if (x.isInstanceOf[A])
-                x.asInstanceOf[A].size
-              else
-                x.asInstanceOf[B].size
-            ```
-            <!-- .element: class="fragment" data-fragment-index="0" -->
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## Type inference and union types
-            - By default, Dotty does not infer union types, they are approximated by a non-union supertype
-              - <!-- .element: class="fragment" --> Union types can be "too precise" and prevent legitimate code from compiling
-              - <!-- .element: class="fragment" --> Union types containing many alternatives (`A | B | C | ...`) can slow down compilation
-            - <!-- .element: class="fragment" --> For now, you can force the compiler to infer unions in a file by doing:
-            ```scala
-            import dotty.language.keepUnions
-            ```
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
             ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
-            - Replace early definitions
-
             ```scala
             trait A {
               val x: String
@@ -226,11 +217,16 @@
             class B extends A { val x = "b" }
             new B // prints "null"
 
-            // Using an early definition
-            class C extends { val x: String = "c" } with A
-            new C // prints "c"
             ```
+            <!-- .element: class="fragment" -->
+            - <!-- .element: class="fragment" --> Using early definitions (dropped feature):
 
+            ```scala
+            class B extends { val x: String = "b" } with A
+            new B // prints "b"
+            ```
+            <!-- .element: class="fragment" -->
+            
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
@@ -244,27 +240,39 @@
             class B extends A("b")
             new B // prints "b"
             ```
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## Literal-based singleton types ([SIP-23](http://docs.scala-lang.org/sips/pending/42.type.html))
-            ```scala
-            val x: 1 = 1
-            ```
-            ```scala
-            val y: List[1 | String] = List("foo", 1, "bar")
-            ```
             <!-- .element: class="fragment" -->
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
             --
             # Proposed features
-            - None of this has been implemented or even designed yet.
+            - <!-- .element: class="fragment" --> Enums
+            - <!-- .element: class="fragment" --> Non-nullable types
             - <!-- .element: class="fragment" --> Effect system
             - <!-- .element: class="fragment" --> Generic programming, like what Shapeless provides (abstract over case classes, ...)
-            - <!-- .element: class="fragment" --> Non-nullable types
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+            --
+            ## Enums
+            ```scala
+            // Java-like
+            enum Color {
+              case Red
+              case Green
+              case Blue
+            }
+            ```
+            <!-- .element: class="fragment" -->
+
+            ```scala
+            // Algebraic Data Type
+            enum List[+T] {
+              case Cons(x: T, xs: List[T])
+              case Nil extends List[Nothing]
+            }
+            ```
+            <!-- .element: class="fragment" -->
 
             JapaneseTranslationGoesHere
             <!-- .element: class="footer" -->
@@ -288,214 +296,21 @@
             val x: String? = null // Shorter syntax
             ```
             <!-- .element: class="fragment" -->
-            - <!-- .element: class="fragment" --> Going further: treat nullability as an effect
-              - <!-- .element: class="fragment" --> Can be turned on/off locally
-              - <!-- .element: class="fragment" --> Keep Java interop as smooth as possible
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
+            --
+            ## Contributing
+            - <!-- .element: class="fragment" --> Documentation: [dotty.epfl.ch](http://dotty.epfl.ch/)
+            - <!-- .element: class="fragment" --> Join our Gitter chat: [gitter.im/lampepfl/dotty](https://gitter.im/lampepfl/dotty)
+            - <!-- .element: class="fragment" --> Try to compile your own project, report issues
+            - <!-- .element: class="fragment" --> Test our IDE support
+            - <!-- .element: class="fragment" --> Look at issues marked "help wanted" on [Github](https://github.com/lampepfl/dotty/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
+              - <!-- .element: class="fragment" --> Many things to do even if you're not a compiler expert!
+
+            JapaneseTranslationGoesHere
+            <!-- .element: class="footer" -->
         </script></section>
-        </section>
-        <section>
-				<section>
-					<h2>Dotty internals: the frontend</h2>
-          <h3>Generating trees and symbols and typing them</h3>
-				</section>
-				<section>
-				  <h2>The compiler pipeline</h2>
-          <img style="margin-left: 130px;" src="images/phases.png">
-        </section>
-				<section>
-				  <h2>Fundamental data structures</h2>
-          <ul>
-            <li>The compiler represents code
-            using <font color="#FF4136">trees</font></li>
-            <li>To ensure type-safety, we attach <font color="#FF4136">types</font> to trees</li>
-            <li>A type might refer to an identifier defined in a
-              tree or in the classpath, to each valid identifier
-              corresponds a <font color="#FF4136">symbol</font> looked
-              up in the symbol table for the current scope
-            <li>Each phase of the compiler pipeline simplifies the trees and types
-              until they can be easily expressed using Java bytecode</li>
-            <!-- XXX: Trees are transformed eagerly, types are transformed lazy
-                 (not all types used in one phase are necessary in the next) -->
-            <li>All of these data structures are immutable (or look immutable but use caching under the hood)</li>
-          </ul>
-        </section>
-				<section>
-				  <h2>Parser: From source file to Untyped Tree</h2>
-          <p>
-            <pre>obj.fun(5)</pre>
-            <pre><font color="#0074D9" class="fragment" data-fragment-index="1">obj</font><font color="#FFDC00" class="fragment" data-fragment-index="2">.fun</font><font color="#FF4136" class="fragment" data-fragment-index="3">(</font><font color="#2ECC40" class="fragment" data-fragment-index="4">5</font><font color="#FF4136" class="fragment" data-fragment-index="3">)</font></pre>
-            <pre><font color="#FF4136" class="fragment" data-fragment-index="3">Apply(</font><font color="#FFDC00" class="fragment" data-fragment-index="2">Select(</font><font color="#0074D9" class="fragment" data-fragment-index="1">Ident("obj")</font><font color="#FFDC00" class="fragment" data-fragment-index="2">, "fun")</font><font color="#FF4136" class="fragment" data-fragment-index="3">, </font><font color="#2ECC40" class="fragment" data-fragment-index="4">Literal(5)</font><font color="#FF4136" class="fragment" data-fragment-index="3">)</font></pre>
-          </p>
-        </section>
-        <section data-markdown data-separator-notes="^Note:" data-separator="^--"><script type="text/template">
-            ## Scala's typing algorithm (heavily simplified)
-
-            - Recursively type subtrees, remembering the expected type
-            - <!-- .element: class="fragment" --> type `obj.fun(5)` with expected type `?`
-              - <!-- .element: class="fragment" --> type `obj.fun` with expected type `? => ?`
-                - <!-- .element: class="fragment" --> type `obj` with expected type `{ fun: ? => ? }`
-                - <!-- .element: class="fragment" --> Assign type to `obj.fun` based on type of `obj`
-              - <!-- .element: class="fragment" --> type `5` where the expected type is the parameter type of `obj.fun`
-              - <!-- .element: class="fragment" --> Assign type to `obj.fun(5)` based on type of `obj.fun` and `5`
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## Purpose of expected type
-            - <!-- .element: class="fragment" --> Infer type parameters
-              - <!-- .element: class="fragment" --> See [Dotty and Types: The Story so far](https://www.youtube.com/watch?v=YIQjfCKDR5A) for more details
-            - <!-- .element: class="fragment" -->  If the actual type does not match the expected type:
-              - <!-- .element: class="fragment" --> Try to adapt (eta-expansion, implicit conversion, ...)
-              - <!-- .element: class="fragment" --> If that fails, replace the type by an `ErrorType` and move on
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## A symbol represents a definition in a scope
-            ```scala
-            class A {
-              def foo[T](x: T): T = x
-            }
-            ```
-            - <!-- .element: class="fragment" --> We create a symbol in a different scope for each of `A`, `foo` and
-            `x`
-            - <!-- .element: class="fragment" --> What is the type of the symbol of `x`?
-              - <!-- .element: class="fragment" --> If we choose `T`, then we need to mutate the symbol after
-            `Erasure`, since `T` will be transformed to `Object`
-              - <!-- .element: class="fragment" --> But symbols and types should be immutable
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## Representing time
-            - Each phase can be seen as an instant of time
-            - <!-- .element: class="fragment" --> A `Period` is an interval of time
-              - <!-- .element: class="fragment" --> `T` is a valid type for `x` starting from the `Frontend` phase
-            until the `Erasure` phase
-            - <!-- .element: class="fragment" --> A symbol does not have a type, instead it has a time-dependent
-            `denotation`
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## denotations are circular linked list of lazily computed types
-            ![](images/den2.png) <!-- .element style="background:none; border:none; box-shadow:none;" -->
-            - <!-- .element: class="fragment" --> Lazy because not all denotations are needed at all periods
-            - <!-- .element: class="fragment" --> Circular because we sometimes need to travel back in time
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-            ## References
-            ```scala
-            class A[T] {
-              val elem: List[T] = Nil
-            }
-            val x = new A[Int]
-            ```
-            - What is the type of `x.elem` ?
-            - <!-- .element: class="fragment" --> It's not the type of the symbol `elem`, that's `List[T]` but we want `List[Int]`
-            - <!-- .element: class="fragment" --> We want the type of `elem` *as seen from* the prefix `x`
-            <!-- - `List[Int]` is not a good answer, after the `Erasure` phase, -->
-            <!--   `x.elem` has the erased type `List` -->
-            <!-- - We need a type to represent the member `elem` of `x`, this type is -->
-            <!-- a *reference* to another type -->
-
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-
-            ## References
-            ```scala
-            // Subclasses of Type
-            class TermRef(prefix: Type, name: TermName) extends …
-            class TypeRef(prefix: Type, name: TypeName) extends …
-            ```
-            - <!-- .element: class="fragment" --> `x.elem` has type `TermRef(TermRef(NoPrefix, "x"), "elem")`, this
-            type is always valid
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-
-            ## References also have denotations
-            ![](images/den3.png) <!-- .element style="background:none; border:none; box-shadow:none;" -->
-
-            JapaneseTranslationGoesHere
-            <!-- .element: class="footer" -->
-            --
-        </script></section>
-        </section>
-        <section>
-	      <section>
-		      <h2>Dotty internals: the middle-end</h2>
-          <h3>Simplifing types and trees with successive transformations</h3>
-        </section>
-
-        <section data-markdown>
-          <script type="text/template">
-            ## Transformation example: ElimRepeated
-
-            - Type transformation: `T*` becomes `Seq[T]`
-            - Tree transformation: `foo("one", "two")` becomes `foo(Seq("one", "two"))`
-          </script>
-        </section>
-	      <section>
-          <h3>Traditional phase design</h3>
-          <h4>1 phase = 1 full traversal</h4>
-        </section>
-        <section data-transition="none-out">
-		      <img src="images/mini1.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/mini2.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/mini3.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/mini4.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/mini5.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/mini6.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/mini7.png">
-        </section>
-	      <section>
-          <h3>Mini-phase design</h3>
-          <h4>N fused mini-phases = 1 full traversal</h4>
-        </section>
-        <section data-transition="none-out">
-		      <img src="images/mini1.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/minib2.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/minib3.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/minib4.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/minib5.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/minib6.png">
-        </section>
-        <section data-transition="none">
-		      <img src="images/minib7.png">
-        </section>
-        </section>
-        <section>
-          <h2>Demo time!</h2>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://github.com/smarter/dotty-tutorial">https://github.com/smarter/dotty-tutorial</a>
-        </section>
       </div>
     </div>
     <script src="lib/js/head.min.js"></script>
