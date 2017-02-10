@@ -42,6 +42,9 @@ JapaneseTranslationGoesHere
   - <!-- .element: class="fragment" --> Dead Code Elimination
   - <!-- .element: class="fragment" --> Automatic specialization (no more `@specialize` !)
 - <!-- .element: class="fragment" --> See [Dmitry's ScalaDays talk](https://www.youtube.com/watch?v=h8KBLF0AgUc)
+
+JapaneseTranslationGoesHere
+<!-- .element: class="footer" -->
 --
 ## The future
 - <!-- .element: class="fragment" --> First Technology Preview release of Dotty soon!
