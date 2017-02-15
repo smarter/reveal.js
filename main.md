@@ -1,5 +1,7 @@
 # The State of Dotty
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Guillaume Martres](http://guillaume.martres.me) - EPFL
+[Guillaume Martres](http://guillaume.martres.me) - EPFL
+
+<!-- .element: style="text-align: center !important" -->
 
 JapaneseTranslationGoesHere
 <!-- .element: class="footer" -->
