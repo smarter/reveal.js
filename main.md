@@ -105,11 +105,12 @@ override def definition(params: TextDocumentPositionParams) =
   - <!-- .element: class="fragment" --> In a few place: old `Context` reached by traversing `Context#outer` chain
   - <!-- .element: class="fragment" --> In many places: accidental closure capture of `Context`
 --
-## Closure leaks detection
+## Closure escape detection
 - <!-- .element: class="fragment" --> MacroPhase: [`CheckClosures`](https://github.com/dotty-staging/dotty/commits/checkClosures)
 - <!-- .element: class="fragment" --> Two annotations:
   - <!-- .element: class="fragment" --> `@checkCaptures` on all types whose capture should be checked
   - <!-- .element: class="fragment" --> `@allowCaptures` on the expected type of closures that should be checked
+- <!-- .element: class="fragment" --> See also [github.com/TiarkRompf/scala-escape](https://github.com/TiarkRompf/scala-escape)
 --
 ## Case Study
 - <!-- .element: class="fragment" --> Annotated `Context` with `@allowCaptures`
@@ -117,10 +118,93 @@ override def definition(params: TextDocumentPositionParams) =
   - <!-- .element: class="fragment" --> ~150 on `def` parameters
   - <!-- .element: class="fragment" --> ~10 on constructor parameters
   - <!-- .element: class="fragment" --> ~10 on `val` return type
-- <!-- .element: class="fragment" --> ~10 issues found
---
-## Recognizing leaks
-- ...
+- <!-- .element: class="fragment" --> ~15 issues found
+-- <!-- .element: data-transition="slide-in"  -->
+## Recognizing and fixing leaks
+
+``` scala
+def foo(tp: => Type) = ...
+def bar(tp: Type => Type) = ...
+
+foo(tp.info)
+bar(tp => tp.info)
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Recognizing and fixing leaks
+
+``` scala
+def foo(tp: Context => Type) = ...
+def bar(tp: Context => Type => Type) = ...
+
+foo(implicit ctx => tp.info)
+bar(implicit ctx => tp => tp.info)
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Recognizing and fixing leaks
+
+``` scala
+  ...
+
+  def doThing() = ...
+
+  bar(implicit ctx => doThing())
+
+  ... 
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Recognizing and fixing leaks
+
+``` scala
+def outer(implicit ctx: Context) = {
+
+  def doThing() = ...
+
+  bar(implicit ctx => doThing())
+
+}
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Recognizing and fixing leaks
+
+``` scala
+def outer(implicit ctx: Context) = {
+
+  def doThing()(implicit ctx: Context) = ...
+
+  bar(implicit ctx => doThing())
+
+}
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Recognizing and fixing leaks
+
+``` scala
+  ...
+
+  def doStuff()(implicit ctx: Context) = ...
+
+  bar(implicit ctx => doStuff())
+
+  ...
+```
+
+-- <!-- .element: data-transition="slide-out"  -->
+## Recognizing and fixing leaks
+
+``` scala
+trait NamerContextOps { this: Context =>
+
+  def doStuff()(implicit ctx: Context) = ...
+
+  bar(implicit ctx => doStuff())
+
+}
+```
 
 --
 ## To make Dotty stronger we must first break it
