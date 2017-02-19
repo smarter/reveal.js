@@ -3,7 +3,7 @@
 
 <!-- .element: style="text-align: center !important" -->
 
-JapaneseTranslationGoesHere
+次世代Scalaコンパイラー Dottyの今
 <!-- .element: class="footer" -->
 --
 ## What is DOT?
@@ -11,14 +11,14 @@ JapaneseTranslationGoesHere
 - <!-- .element: class="fragment" --> Goal: prove Scala type system is sound
   - <!-- .element: class="fragment" --> If code compiles and does not use unsafe features, no `ClassCastException`
 
-JapaneseTranslationGoesHere
+DOT計算は、Scala型システムの理論的基礎
 <!-- .element: class="footer" -->
 --
 ## What is Dotty?
 - <!-- .element: class="fragment" --> A new, experimental compiler for Scala developed at EPFL
 - <!-- .element: class="fragment" --> Type system internals redesigned, inspired by DOT, but externally very similar
 
-JapaneseTranslationGoesHere
+Dotty は EPFL が開発中の実験的な新コンパイラ
 <!-- .element: class="footer" -->
 --
 ## A chance to redesign components
@@ -26,7 +26,8 @@ JapaneseTranslationGoesHere
 - <!-- .element: class="fragment" -->  Better pattern matching checks
 - <!-- .element: class="fragment" --> Some of these components may be ported back to Scala 2
 
-JapaneseTranslationGoesHere
+インクリメンタルコンパイルやパターンマッチを再設計するチャンス
+これらの改善は Scala 2 にも取り込めるかも
 <!-- .element: class="footer" -->
 --
 ## Tooling
@@ -36,7 +37,7 @@ A good developer experience requires good tools:
 - <!-- .element: class="fragment" --> IDE support using the [Language Server Protocol](https://github.com/Microsoft/language-server-protocol) (Visual Studio Code, Eclipse, ...)
 - <!-- .element: class="fragment" --> See Felix's talk tomorrow for more details!
 
-JapaneseTranslationGoesHere
+良い開発体験のためにはコンパイラ以外のツール群の改善も必要
 <!-- .element: class="footer" -->
 --
 ## The Dotty Linker
@@ -45,7 +46,8 @@ JapaneseTranslationGoesHere
   - <!-- .element: class="fragment" --> Automatic specialization (no more `@specialize` !)
 - <!-- .element: class="fragment" --> See [Dmitry's ScalaDays talk](https://www.youtube.com/watch?v=h8KBLF0AgUc)
 
-JapaneseTranslationGoesHere
+Dotty リンカが呼び出しグラフを解析して最適化
+到達不能コードの削除、@specialize の自動化
 <!-- .element: class="footer" -->
 --
 ## The future
@@ -55,7 +57,8 @@ JapaneseTranslationGoesHere
   - <!-- .element: class="fragment" --> Compatibility mode in Dotty for deprecated features
   - <!-- .element: class="fragment" --> Scala 2 will start implementing features prototyped in Dotty (trait parameters, ...)
 
-JapaneseTranslationGoesHere
+近日中に最初の技術プレビュー版 Dotty がリリース！
+Scala 2 も Dotty で検証した機能を取り込みながら開発を継続
 <!-- .element: class="footer" -->
 --
 ## Migrating code
@@ -64,12 +67,12 @@ JapaneseTranslationGoesHere
   - <!-- .element: class="fragment" --> Differences in type inference
 - <!-- .element: class="fragment" --> [Scalafix](https://github.com/scalacenter/scalafix) automatically rewrites your code to ease migration
 
-JapaneseTranslationGoesHere
+Scalafix は Scala 2 から Dotty への移行を自動化するツール
 <!-- .element: class="footer" -->
 --
 # Dropped features
 
-JapaneseTranslationGoesHere
+廃止された機能
 <!-- .element: class="footer" -->
 --
 ## Macros
@@ -78,7 +81,8 @@ JapaneseTranslationGoesHere
   - <!-- .element: class="fragment" --> Easier to use, more typesafe
   - <!-- .element: class="fragment" --> Should support both Scala 2 and Dotty
 
-JapaneseTranslationGoesHere
+従来のマクロに代わり、scala.meta が新しいマクロシステムとなる
+Scala 2 と Dotty の両方をサポートする予定
 <!-- .element: class="footer" -->
 --
 ## Procedure syntax
@@ -99,7 +103,7 @@ def foo(): Unit = {
 ```
 <!-- .element: class="fragment" -->
 
-JapaneseTranslationGoesHere
+プロシージャ構文の変更（必ず `Unit` をつける）
 <!-- .element: class="footer" -->
 --
 ## <!-- .element: style="text-transform: none;" --> `forSome`
@@ -116,12 +120,12 @@ val x: Array[_ <: Foo] = ...
 ```
 <!-- .element: class="fragment" -->
 
-JapaneseTranslationGoesHere
+従来の `forSome` 構文に相当するワイルドカードを追加
 <!-- .element: class="footer" -->
 --
 # Implemented features
 
-JapaneseTranslationGoesHere
+実装された新機能
 <!-- .element: class="footer" -->
 --
 ## Improved type inference
@@ -140,7 +144,7 @@ ap2(1, x => x * 2) // Only compiles with Dotty
 
 -  <!-- .element: class="fragment" --> See the talk [Dotty and Types: The Story So Far](http://guillaume.martres.me/talks/typelevel-summit-oslo/#/) for more details
 
-JapaneseTranslationGoesHere
+型推論の改善
 <!-- .element: class="footer" -->
 --
 ## Functions with very many parameters
@@ -149,14 +153,14 @@ JapaneseTranslationGoesHere
   too many parameters, use `FunctionXXL` which takes an array of
   parameters.
 
-JapaneseTranslationGoesHere
+Dotty では関数の引数の 22 個制限がなくなる
 <!-- .element: class="footer" -->
 --
 ## Intersection types
 - <!-- .element: class="fragment" --> A value has type `A & B` if it has both type `A` and type `B`
   - <!-- .element: class="fragment" --> replaces `A with B`
 
-JapaneseTranslationGoesHere
+`A with B` を置き換える交差型 (`A & B`) の導入
 <!-- .element: class="footer" -->
 --
 ## Union types
@@ -169,7 +173,8 @@ val foo = if (cond) 1 else "test"
 - <!-- .element: class="fragment" --> In Scala 2: `foo` has type `Any`
 - <!-- .element: class="fragment" --> In Dotty: `foo` has type `Int | String`
 
-JapaneseTranslationGoesHere
+合併型 (`A | B`) は `A` と `B` のどちらでもある型
+Scala 2 では実現できなかった型の表現
 <!-- .element: class="footer" -->
 --
 ## Pattern matching on a union type
@@ -182,7 +187,7 @@ x match {
 ```
 - <!-- .element: class="fragment" --> This is safe: if you forget a case in your match the compiler will warn you
 
-JapaneseTranslationGoesHere
+コンパイラが合併型の網羅性を警告してくれるので安全
 <!-- .element: class="footer" -->
 --
 ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
@@ -204,7 +209,7 @@ new B // prints "b"
 ```
 <!-- .element: class="fragment" -->
 
-JapaneseTranslationGoesHere
+トレイトパラメータの導入により事前定義の機能は廃止
 <!-- .element: class="footer" -->
 --
 ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
@@ -219,7 +224,7 @@ new B // prints "b"
 ```
 <!-- .element: class="fragment" -->
 
-JapaneseTranslationGoesHere
+クラス・パラメータに相当する
 <!-- .element: class="footer" -->
 --
 # Proposed features
@@ -228,7 +233,7 @@ JapaneseTranslationGoesHere
 - <!-- .element: class="fragment" --> Effect system
 - <!-- .element: class="fragment" --> Generic programming, like what Shapeless provides (abstract over case classes, ...)
 
-JapaneseTranslationGoesHere
+現在提唱されている機能
 <!-- .element: class="footer" -->
 --
 ## Enums
@@ -251,7 +256,7 @@ enum List[+T] {
 ```
 <!-- .element: class="fragment" -->
 
-JapaneseTranslationGoesHere
+Java ライクな列挙型。代数的データ型も定義できる
 <!-- .element: class="footer" -->
 --
 ## Non-nullable types
@@ -274,7 +279,7 @@ val x: String? = null // Shorter syntax
 ```
 <!-- .element: class="fragment" -->
 
-JapaneseTranslationGoesHere
+`null` を許容しない型をデフォルトとする
 <!-- .element: class="footer" -->
 --
 ## Contributing
@@ -285,5 +290,6 @@ JapaneseTranslationGoesHere
 - <!-- .element: class="fragment" --> Look at issues marked "help wanted" on [Github](https://github.com/lampepfl/dotty/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
   - <!-- .element: class="fragment" --> Many things to do even if you're not a compiler expert!
 
-JapaneseTranslationGoesHere
+皆さんの協力が必要です。コンパイラの専門家じゃなくても大丈夫！
+自分のプロジェクトをコンパイルして問題を報告、IDE のテストなど
 <!-- .element: class="footer" -->
