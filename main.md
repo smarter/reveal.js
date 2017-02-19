@@ -4,6 +4,7 @@
 <!-- .element: style="text-align: center !important" -->
 
 次世代Scalaコンパイラー Dottyの今
+
 <!-- .element: class="footer" -->
 --
 ## What is DOT?
@@ -12,6 +13,7 @@
   - <!-- .element: class="fragment" --> If code compiles and does not use unsafe features, no `ClassCastException`
 
 DOT計算は、Scala型システムの理論的基礎
+
 <!-- .element: class="footer" -->
 --
 ## What is Dotty?
@@ -19,6 +21,7 @@ DOT計算は、Scala型システムの理論的基礎
 - <!-- .element: class="fragment" --> Type system internals redesigned, inspired by DOT, but externally very similar
 
 Dotty は EPFL が開発中の実験的な新コンパイラ
+
 <!-- .element: class="footer" -->
 --
 ## A chance to redesign components
@@ -28,6 +31,7 @@ Dotty は EPFL が開発中の実験的な新コンパイラ
 
 インクリメンタルコンパイルやパターンマッチを再設計するチャンス
 これらの改善は Scala 2 にも取り込めるかも
+
 <!-- .element: class="footer" -->
 --
 ## Tooling
@@ -38,6 +42,7 @@ A good developer experience requires good tools:
 - <!-- .element: class="fragment" --> See Felix's talk tomorrow for more details!
 
 良い開発体験のためにはコンパイラ以外のツール群の改善も必要
+
 <!-- .element: class="footer" -->
 --
 ## The Dotty Linker
@@ -48,6 +53,7 @@ A good developer experience requires good tools:
 
 Dotty リンカが呼び出しグラフを解析して最適化
 到達不能コードの削除、@specialize の自動化
+
 <!-- .element: class="footer" -->
 --
 ## The future
@@ -59,6 +65,7 @@ Dotty リンカが呼び出しグラフを解析して最適化
 
 近日中に最初の技術プレビュー版 Dotty がリリース！
 Scala 2 も Dotty で検証した機能を取り込みながら開発を継続
+
 <!-- .element: class="footer" -->
 --
 ## Migrating code
@@ -68,11 +75,13 @@ Scala 2 も Dotty で検証した機能を取り込みながら開発を継続
 - <!-- .element: class="fragment" --> [Scalafix](https://github.com/scalacenter/scalafix) automatically rewrites your code to ease migration
 
 Scalafix は Scala 2 から Dotty への移行を自動化するツール
+
 <!-- .element: class="footer" -->
 --
 # Dropped features
 
 廃止された機能
+
 <!-- .element: class="footer" -->
 --
 ## Macros
@@ -83,6 +92,7 @@ Scalafix は Scala 2 から Dotty への移行を自動化するツール
 
 従来のマクロに代わり、scala.meta が新しいマクロシステムとなる
 Scala 2 と Dotty の両方をサポートする予定
+
 <!-- .element: class="footer" -->
 --
 ## Procedure syntax
@@ -104,6 +114,7 @@ def foo(): Unit = {
 <!-- .element: class="fragment" -->
 
 プロシージャ構文の変更（必ず `Unit` をつける）
+
 <!-- .element: class="footer" -->
 --
 ## <!-- .element: style="text-transform: none;" --> `forSome`
@@ -121,11 +132,13 @@ val x: Array[_ <: Foo] = ...
 <!-- .element: class="fragment" -->
 
 従来の `forSome` 構文に相当するワイルドカードを追加
+
 <!-- .element: class="footer" -->
 --
 # Implemented features
 
 実装された新機能
+
 <!-- .element: class="footer" -->
 --
 ## Improved type inference
@@ -145,6 +158,7 @@ ap2(1, x => x * 2) // Only compiles with Dotty
 -  <!-- .element: class="fragment" --> See the talk [Dotty and Types: The Story So Far](http://guillaume.martres.me/talks/typelevel-summit-oslo/#/) for more details
 
 型推論の改善
+
 <!-- .element: class="footer" -->
 --
 ## Functions with very many parameters
@@ -154,6 +168,7 @@ ap2(1, x => x * 2) // Only compiles with Dotty
   parameters.
 
 Dotty では関数の引数の 22 個制限がなくなる
+
 <!-- .element: class="footer" -->
 --
 ## Intersection types
@@ -161,6 +176,7 @@ Dotty では関数の引数の 22 個制限がなくなる
   - <!-- .element: class="fragment" --> replaces `A with B`
 
 `A with B` を置き換える交差型 (`A & B`) の導入
+
 <!-- .element: class="footer" -->
 --
 ## Union types
@@ -175,6 +191,7 @@ val foo = if (cond) 1 else "test"
 
 合併型 (`A | B`) は `A` と `B` のどちらでもある型
 Scala 2 では実現できなかった型の表現
+
 <!-- .element: class="footer" -->
 --
 ## Pattern matching on a union type
@@ -188,6 +205,7 @@ x match {
 - <!-- .element: class="fragment" --> This is safe: if you forget a case in your match the compiler will warn you
 
 コンパイラが合併型の網羅性を警告してくれるので安全
+
 <!-- .element: class="footer" -->
 --
 ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
@@ -210,6 +228,7 @@ new B // prints "b"
 <!-- .element: class="fragment" -->
 
 トレイトパラメータの導入により事前定義の機能は廃止
+
 <!-- .element: class="footer" -->
 --
 ## Trait parameters ([SIP-25](http://docs.scala-lang.org/sips/pending/trait-parameters.html))
@@ -225,6 +244,7 @@ new B // prints "b"
 <!-- .element: class="fragment" -->
 
 クラス・パラメータに相当する
+
 <!-- .element: class="footer" -->
 --
 # Proposed features
@@ -234,6 +254,7 @@ new B // prints "b"
 - <!-- .element: class="fragment" --> Generic programming, like what Shapeless provides (abstract over case classes, ...)
 
 現在提唱されている機能
+
 <!-- .element: class="footer" -->
 --
 ## Enums
@@ -257,6 +278,7 @@ enum List[+T] {
 <!-- .element: class="fragment" -->
 
 Java ライクな列挙型。代数的データ型も定義できる
+
 <!-- .element: class="footer" -->
 --
 ## Non-nullable types
@@ -280,6 +302,7 @@ val x: String? = null // Shorter syntax
 <!-- .element: class="fragment" -->
 
 `null` を許容しない型をデフォルトとする
+
 <!-- .element: class="footer" -->
 --
 ## Contributing
@@ -292,4 +315,5 @@ val x: String? = null // Shorter syntax
 
 皆さんの協力が必要です。コンパイラの専門家じゃなくても大丈夫！
 自分のプロジェクトをコンパイルして問題を報告、IDE のテストなど
+
 <!-- .element: class="footer" -->
