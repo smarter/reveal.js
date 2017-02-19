@@ -29,10 +29,10 @@ Dotty は EPFL が開発中の実験的な新コンパイラ
 - <!-- .element: class="fragment" -->  Better pattern matching checks
 - <!-- .element: class="fragment" --> Some of these components may be ported back to Scala 2
 
-インクリメンタルコンパイルやパターンマッチを再設計するチャンス
+インクリメンタルコンパイルやパターンマッチを再設計するチャンス<br>
 これらの改善は Scala 2 にも取り込めるかも
 
-<!-- .element: class="footer" -->
+<!-- .element: class="footer" style="font-size: 83% !important;" -->
 --
 ## Tooling
 A good developer experience requires good tools:
@@ -51,7 +51,7 @@ A good developer experience requires good tools:
   - <!-- .element: class="fragment" --> Automatic specialization (no more `@specialize` !)
 - <!-- .element: class="fragment" --> See [Dmitry's ScalaDays talk](https://www.youtube.com/watch?v=h8KBLF0AgUc)
 
-Dotty リンカが呼び出しグラフを解析して最適化
+Dotty リンカが呼び出しグラフを解析して最適化<br>
 到達不能コードの削除、@specialize の自動化
 
 <!-- .element: class="footer" -->
@@ -63,7 +63,7 @@ Dotty リンカが呼び出しグラフを解析して最適化
   - <!-- .element: class="fragment" --> Compatibility mode in Dotty for deprecated features
   - <!-- .element: class="fragment" --> Scala 2 will start implementing features prototyped in Dotty (trait parameters, ...)
 
-近日中に最初の技術プレビュー版 Dotty がリリース！
+近日中に最初の技術プレビュー版 Dotty がリリース！<br>
 Scala 2 も Dotty で検証した機能を取り込みながら開発を継続
 
 <!-- .element: class="footer" -->
@@ -90,10 +90,10 @@ Scalafix は Scala 2 から Dotty への移行を自動化するツール
   - <!-- .element: class="fragment" --> Easier to use, more typesafe
   - <!-- .element: class="fragment" --> Should support both Scala 2 and Dotty
 
-従来のマクロに代わり、scala.meta が新しいマクロシステムとなる
+従来のマクロに代わり、scala.meta が新しいマクロシステムとなる<br>
 Scala 2 と Dotty の両方をサポートする予定
 
-<!-- .element: class="footer" -->
+<!-- .element: class="footer" style="font-size: 85% !important;" -->
 --
 ## Procedure syntax
 - <!-- .element: class="fragment" --> Instead of writing:
@@ -189,7 +189,7 @@ val foo = if (cond) 1 else "test"
 - <!-- .element: class="fragment" --> In Scala 2: `foo` has type `Any`
 - <!-- .element: class="fragment" --> In Dotty: `foo` has type `Int | String`
 
-合併型 (`A | B`) は `A` と `B` のどちらでもある型
+合併型 (`A | B`) は `A` と `B` のどちらでもある型<br>
 Scala 2 では実現できなかった型の表現
 
 <!-- .element: class="footer" -->
@@ -313,7 +313,7 @@ val x: String? = null // Shorter syntax
 - <!-- .element: class="fragment" --> Look at issues marked "help wanted" on [Github](https://github.com/lampepfl/dotty/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
   - <!-- .element: class="fragment" --> Many things to do even if you're not a compiler expert!
 
-皆さんの協力が必要です。コンパイラの専門家じゃなくても大丈夫！
+皆さんの協力が必要です。コンパイラの専門家じゃなくても大丈夫！<br>
 自分のプロジェクトをコンパイルして問題を報告、IDE のテストなど
 
-<!-- .element: class="footer" -->
+<!-- .element: class="footer" style="font-size: 82% !important;" -->
