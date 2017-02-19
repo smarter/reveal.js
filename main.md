@@ -32,7 +32,7 @@ Dotty は EPFL が開発中の実験的な新コンパイラ
 インクリメンタルコンパイルやパターンマッチを再設計するチャンス<br>
 これらの改善は Scala 2 にも取り込めるかも
 
-<!-- .element: class="footer" style="font-size: 83% !important;" -->
+<!-- .element: class="footer" style="font-size: 73% !important;" -->
 --
 ## Tooling
 A good developer experience requires good tools:
@@ -93,7 +93,7 @@ Scalafix は Scala 2 から Dotty への移行を自動化するツール
 従来のマクロに代わり、scala.meta が新しいマクロシステムとなる<br>
 Scala 2 と Dotty の両方をサポートする予定
 
-<!-- .element: class="footer" style="font-size: 85% !important;" -->
+<!-- .element: class="footer" style="font-size: 74% !important;" -->
 --
 ## Procedure syntax
 - <!-- .element: class="fragment" --> Instead of writing:
@@ -316,4 +316,4 @@ val x: String? = null // Shorter syntax
 皆さんの協力が必要です。コンパイラの専門家じゃなくても大丈夫！<br>
 自分のプロジェクトをコンパイルして問題を報告、IDE のテストなど
 
-<!-- .element: class="footer" style="font-size: 82% !important;" -->
+<!-- .element: class="footer" style="font-size: 73% !important;" -->
