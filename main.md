@@ -131,7 +131,7 @@ val x: Array[_ <: Foo] = ...
 ```
 <!-- .element: class="fragment" -->
 
-従来の `forSome` 構文に相当するワイルドカードを追加
+`forSome` は代わりにワイルドカードで書き換える
 
 <!-- .element: class="footer" -->
 --
