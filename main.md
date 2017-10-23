@@ -37,21 +37,73 @@ A good developer experience requires good tools:
   - Scala plugin for IntelliJ IDEA (230 KLOC)
 --
 ## Design principles
-- <!-- .element: class="fragment" --> Based on reusable primitives
-- <!-- .element: class="fragment" --> Editor-agnostic
-- <!-- .element: class="fragment" --> Easy to use (and to install!)
+1. <!-- .element: class="fragment" --> Code reuse
+2. <!-- .element: class="fragment" --> Editor-agnosticity
+3. <!-- .element: class="fragment" --> Easy to use (and to install!)
 --
-## Making Dotty interactive
-<img class="fragment" style="margin-left: 130px;" src="images/phases.png">
-- <!-- .element: class="fragment" --> Store trees after Typer
+# Part 1
+## Interactive API<span style="text-transform: none;">s</span> based on reusable primitives
+--<!-- .element: data-transition="slide-in"  -->
+## Querying the compiler
+<img class="fragment" style="margin-left: 130px; border:none;" src="images/phases-black.png">
+- <!-- .element: class="fragment"  --> Each phase progressively simplify trees until they can be emitted as JVM bytecode
+--<!-- .element: data-transition="slide-out"  -->
+## Querying the compiler
+<img style="margin-left: 130px; border:none;" src="images/phases-black-typer.png">
+- Each phase progressively simplify trees until they can be emitted as JVM bytecode
+-- <!-- .element: data-transition="slide-in"  -->
+## Source code
+```scala
+  final val elem = 1
+
+  val foo = elem🚩 + 1
+```
+
+- <!-- .element: class="fragment" -->  Cursor position = 🚩
+- <!-- .element: class="fragment" -->  Query: jump to definition
+-- <!-- .element: data-transition="none"  -->
+## Tree after <span style="text-transform: none; font-family: monospace;">Typer</span>
+```scala
+  final val elem: 1 = 1
+
+  val foo: Int = elem + 1
+```
+- <!-- .element: class="fragment" --> Every tree node has a type and a position
+- <!-- .element: class="fragment" --> Query can be answered
+-- <!-- .element: data-transition="slide-out"  -->
+## Tree after <span style="text-transform: none; font-family: monospace;">FirstTransform</span>
+```scala
+  final val elem: 1 = 1
+
+  val foo: Int = 2
+```
+- <!-- .element: class="fragment" -->  Information lost by constant folding
+- <!-- .element: class="fragment" --> Impossible to answer query
+--
+## Querying the compiler
+- <!-- .element: class="fragment" --> Store trees after `Typer`
 - <!-- .element: class="fragment" --> Respond to IDE queries by traversing trees
+- <!-- .element: class="fragment" --> What about code that has already been compiled?
+--
+## Pickling
+<img style="margin-left: 130px; border:none; margin-bottom: -20px;" src="images/phases-black-pickler.png">
+- <!-- .element: class="fragment" --> In Scala 2: store methods signatures (for separate compilation)
+- <!-- .element: class="fragment" --> In Dotty: store full trees
 --
 ## TASTY: Typed AST serialization format
 - <!-- .element: class="fragment" --> Original motivation: solve the [binary compatibility problem](https://www.slideshare.net/Odersky/scalax)
   - <!-- .element: class="fragment" --> Always use JVM bytecode: breaks when compiler encoding changes
   - <!-- .element: class="fragment" --> Always recompile source code: breaks when the typechecker changes
-- <!-- .element: class="fragment" --> Can also be used to provide interactive features!
-
+- <!-- .element: class="fragment" --> Can also be used to provide interactive features: deserialize and query trees
+--
+## Interactive APIs
+-  <!-- .element: class="fragment" --> Convenience methods for tree traversal, compiler lifecycle management
+-  <!-- .element: class="fragment" --> Used both in the IDE and the REPL
+-  <!-- .element: class="fragment" --> In the future: indexing, resource management, interruption handling, partial typechecking, ...
+-  <!-- .element: class="fragment" --> 0.5 KLOC
+--
+# Part 2
+## Editor-agnosticity
 --
 ## The IDE Portability Problem
 Getting <em style="font-family: serif;">m</em> IDEs to support <em style="font-family: serif;">n</em> programming languages requires <em style="font-family: serif;">n*m</em> IDE plugins.
@@ -63,6 +115,7 @@ Getting <em style="font-family: serif;">m</em> IDEs to support <em style="font-f
 <!-- .element: style="text-align: center !important" -->
 --
 ## Basics of the LSP
+- <!-- .element: class="fragment" --> First implemented in Visual Studio Code
 - <!-- .element: class="fragment" --> JSON-RPC
 - <!-- .element: class="fragment" --> IDE notifies the language server about user actions
 - <!-- .element: class="fragment" --> LS maintains internal representation of code
@@ -77,6 +130,7 @@ Getting <em style="font-family: serif;">m</em> IDEs to support <em style="font-f
 ## Implementing the Dotty Language Server
 - <!-- .element: class="fragment" --> Low-level message handling done by [Eclipse LSP4J](https://github.com/eclipse/lsp4j)
 - <!-- .element: class="fragment" --> Relies on interactive APIs
+- <!-- .element: class="fragment" --> 0.5 KLOC
 -- <!-- .element: data-transition="slide-in"  -->
 ```scala
 override def definition(params: TextDocumentPositionParams) =
@@ -277,14 +331,22 @@ override def definition(params: TextDocumentPositionParams) =
 ```
 
 --
+# Part 3
+## Making it easy to use: build tool and IDE integration
+--
+<img src="images/sbt.png" width="70%" style="border: none;">
+
+<!-- .element: style="text-align: center !important" -->
+--
 ## sbt integration
 - <!-- .element: class="fragment" --> Analyze the build to find Dotty projects
 - <!-- .element: class="fragment" --> Compile these projects
 - <!-- .element: class="fragment" --> Generate configuration files
-- <!-- .element: class="fragment" --> Launch the IDE
+- <!-- .element: class="fragment" --> Install the Dotty VSCode extension
+- <!-- .element: class="fragment" --> Launch VSCode
 --
 ## Configuration files
-- `.dotty-ide-artifact`, used by the IDE extension to launch the DLS:
+- `.dotty-ide-artifact`, used by the IDE extension to launch the Dotty Language Server:
 ```plain
 ch.epfl.lamp:dotty-language-server_0.4:0.4.0-RC1
 ```
@@ -311,3 +373,21 @@ ch.epfl.lamp:dotty-language-server_0.4:0.4.0-RC1
 
 ```
 --
+## Future work
+- <!-- .element: class="fragment" --> Optimizations
+- <!-- .element: class="fragment" --> More features
+  - <!-- .element: class="fragment" --> Documentation on hover
+- <!-- .element: class="fragment" --> Better build tool integration (sbt server mode)
+- <!-- .element: class="fragment" -->  Debugging support (based on the [Java Debug Server](https://github.com/Microsoft/java-debug))
+  - <!-- .element: class="fragment" --> Evaluating Scala expressions in the debugger
+--
+## Conclusion
+- <!-- .element: class="fragment" --> Design your compiler with interactivity in mind
+- <!-- .element: class="fragment" --> Design your build tool with interactivity in mind
+- <!-- .element: class="fragment" --> Interactivity should go beyond what IDEs and REPLs currently offer
+  - <!-- .element: class="fragment" --> [Type Driven Development with Idris](https://www.manning.com/books/type-driven-development-with-idris)
+--
+## Questions ?
+- More info: [dotty.epfl.ch](dotty.epfl.ch)
+- Come chat with us: [gitter.im/lampepfl/dotty](http://gitter.im/lampepfl/dotty)
+- Contributors welcome!
