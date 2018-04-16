@@ -35,14 +35,19 @@ A good developer experience requires good tools:
   - ENSIME (server: 15 KLOC, emacs client: 10 KLOC)
 - Reimplementation of the Scala typechecker
   - Scala plugin for IntelliJ IDEA (230 KLOC)
---
+-- <!-- .element: data-transition="slide-in"  -->
 ## Design principles
 1. <!-- .element: class="fragment" --> Code reuse
 2. <!-- .element: class="fragment" --> Editor-agnosticity
 3. <!-- .element: class="fragment" --> Easy to use (and to install!)
---
-# Part 1
-## Interactive API<span style="text-transform: none;">s</span> based on reusable primitives
+-- <!-- .element: data-transition="slide-out"  -->
+## Design principles
+1. <span style="color: orangered;"> Code reuse </span>
+2. <span style="opacity: 0.5;"> Editor-agnosticity </span>
+3. <span style="opacity: 0.5;"> Easy to use (and to install!) </span>
+<!-- -- -->
+<!-- # Part 1 -->
+<!-- ## Interactive API<span style="text-transform: none;">s</span> based on reusable primitives -->
 --<!-- .element: data-transition="slide-in"  -->
 ## Querying the compiler
 <img class="fragment" style="margin-left: 130px; border:none;" src="images/phases-black.png">
@@ -102,8 +107,13 @@ A good developer experience requires good tools:
 -  <!-- .element: class="fragment" --> In the future: indexing, resource management, interruption handling, partial typechecking, ...
 -  <!-- .element: class="fragment" --> 0.5 KLOC
 --
-# Part 2
-## Editor-agnosticity
+## Design principles
+1. <span style="opacity: 0.5;"> Code reuse </span>
+2. <span style="color: orangered;"> Editor-agnosticity </span>
+3. <span style="opacity: 0.5;"> Easy to use (and to install!) </span>
+<!-- -- -->
+<!-- # Part 2 -->
+<!-- ## Editor-agnosticity -->
 --
 ## The IDE Portability Problem
 Getting <em style="font-family: serif;">m</em> IDEs to support <em style="font-family: serif;">n</em> programming languages requires <em style="font-family: serif;">n*m</em> IDE plugins.
@@ -331,8 +341,10 @@ override def definition(params: TextDocumentPositionParams) =
 ```
 
 --
-# Part 3
-## Making it easy to use: build tool and IDE integration
+## Design principles
+1. <span style="opacity: 0.5;"> Code reuse </span>
+2. <span style="opacity: 0.5;"> Editor-agnosticity </span>
+3. <span style="color: orangered;"> Easy to use (and to install!) </span>
 --
 <img src="images/sbt.png" width="70%" style="border: none;">
 
