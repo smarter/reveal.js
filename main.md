@@ -1,4 +1,4 @@
-# Interactive Development using the Dotty Compiler
+# Integrating IDE<span style="text-transform: none;">s</span> with Dotty
 [Guillaume Martres](http://guillaume.martres.me) - EPFL
 
 <!-- .element: style="text-align: center !important" -->
@@ -86,7 +86,7 @@ A good developer experience requires good tools:
 - <!-- .element: class="fragment" --> Impossible to answer query
 --
 ## Querying the compiler
-- <!-- .element: class="fragment" --> Store trees after `Typer`
+- <!-- .element: class="fragment" --> Store trees before `FirstTransform`
 - <!-- .element: class="fragment" --> Respond to IDE queries by traversing trees
 - <!-- .element: class="fragment" --> What about code that has already been compiled?
 --
@@ -102,10 +102,10 @@ A good developer experience requires good tools:
 - <!-- .element: class="fragment" --> Can also be used to provide interactive features: deserialize and query trees
 --
 ## Interactive APIs
--  <!-- .element: class="fragment" --> Convenience methods for tree traversal, compiler lifecycle management
--  <!-- .element: class="fragment" --> Used both in the IDE and the REPL
--  <!-- .element: class="fragment" --> In the future: indexing, resource management, interruption handling, partial typechecking, ...
--  <!-- .element: class="fragment" --> 0.5 KLOC
+-  <!-- .element: class="fragment" --> Convenience methods for tree traversals, compiler lifecycle management
+-  <!-- .element: class="fragment" --> Used both in the IDE and the REPL (e.g., for completions)
+-  <!-- .element: class="fragment" --> In the future: interruption handling, partial typechecking, ...
+-  <!-- .element: class="fragment" --> Less then 1 KLOC
 --
 ## Design principles
 1. <span style="opacity: 0.5;"> Code reuse </span>
@@ -360,7 +360,7 @@ override def definition(params: TextDocumentPositionParams) =
 ## Configuration files
 - `.dotty-ide-artifact`, used by the IDE extension to launch the Dotty Language Server:
 ```plain
-ch.epfl.lamp:dotty-language-server_0.4:0.4.0-RC1
+ch.epfl.lamp:dotty-language-server_0.8:0.8.0-RC1
 ```
 --
 ## Configuration files
@@ -370,11 +370,11 @@ ch.epfl.lamp:dotty-language-server_0.4:0.4.0-RC1
 [
   {
     "id" : "root/compile",
-    "compilerVersion" : "0.4.0-RC1",
+    "compilerVersion" : "0.8.0-RC1",
     "compilerArguments" : [ ],
     "sourceDirectories" : [ "src/main/scala" ],
     "dependencyClasspath" : [ ... ],
-    "classDirectory" : "target/scala-0.4/classes"
+    "classDirectory" : "target/scala-0.8/classes"
   },
   {
     "id" : "root/test",
@@ -385,13 +385,161 @@ ch.epfl.lamp:dotty-language-server_0.4:0.4.0-RC1
 
 ```
 --
+## Design principles, revisited
+1. Code reuse
+   - <!-- .element: class="fragment" --> Compiler APIs for interactive usage
+2. Editor-agnosticity
+   - <!-- .element: class="fragment" --> Implemented the LSP
+3. Easy to use (and to install!)
+   - <!-- .element: class="fragment" --> One command (but we can do better!)
+--
+## Bonus: Debugger Support
+- <!-- .element: class="fragment" --> Based on the [Java Debug Server](https://github.com/Microsoft/java-debug)
+- <!-- .element: class="fragment" --> Most features "just work"
+- <!-- .element: class="fragment" --> Challenge: expression evaluation
+-- <!-- .element: data-transition="none"  -->
+## Expression Evaluation
+``` scala
+class Hello {
+  def foo(implicit y: Context): String = { /*...*/ }
+  def bar(implicit y: Context) = {
+
+    /*...*/
+  }
+}
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Expression Evaluation
+``` scala
+class Hello {
+  def foo(implicit y: Context): String = { /*...*/ }
+  def bar(implicit y: Context) = {
+🚩
+    /*...*/
+  }
+}
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Expression Evaluation
+``` scala
+class Hello {
+  def foo(implicit y: Context): String = { /*...*/ }
+  def bar(implicit y: Context) = {
+🚩  foo
+    /*...*/
+  }
+}
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Run the compiler pipeline
+``` scala
+class Hello {
+  def foo(y: Context): String = { /*...*/ }
+  def bar(y: Context) = {
+🚩  this.foo(y)
+    /*...*/
+  }
+}
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Extract to a static method
+``` scala
+object Global {
+  def liftedExpr($this: Hello, y: Context) =
+    $this.foo(y)
+    
+
+
+
+
+
+}
+```
+
+-- <!-- .element: data-transition="none"  -->
+## Extract to a static method
+``` scala
+object Global {
+  def liftedExpr($this: Hello, y: Context) =
+    $this.foo(y)
+    
+  def exec(self: Object, localVariables: Map[String, Object]) =
+    liftedExpr(
+      self.asInstanceOf[Hello],
+      localVariables("y").asInstanceOf[Context]
+    )
+}
+
+```
+
+-- <!-- .element: data-transition="none"  -->
+## On the debugging VM
+- <!-- .element: class="fragment" --> Compile `Global` to a classfile
+- <!-- .element: class="fragment" --> Load it in the debugged VM
+- <!-- .element: class="fragment" --> Call `Global.exec` with the right arguments
+
+-- <!-- .element: data-transition="none"  -->
+## On the debugged VM
+
+- In the standard library
+
+``` scala
+package dotty.runtime
+
+object DebugEval {
+  def eval(classpath: String,
+           self: Object,
+           localVariables: Map[String, Object]): Any = {
+    val cl = new URLClassLoader(Array(new URL("file://" + classpath)))
+    val cls = cl.loadClass("Global")
+    val instance = cls.newInstance
+
+    val exec = cls.getMethod("exec")
+    exec.invoke(instance, self, names, args)
+  }
+}
+```
+--
+## On the debugging VM
+We want to remotely execute:
+``` scala
+val classpath = <classpath for the compiled Global class>
+val self = <this in the stackframe>
+val localVariables = <map of local variables in the stackframe>
+dotty.runtime.DebugEval(classpath, self, localVariables)
+```
+--
+## On the debugging VM
+We use the Java Debugging Interface APIs:
+``` scala
+val vars = stackFrame.visibleVariables
+val mapCls =
+  vm.classesByName("java.util.Map")
+    .get(0).asInstanceOf[ClassType]
+val localVariablesRef = mapCls.newInstance()
+// Skipped: store `vars` into `localVariablesRef`
+val debugCls =
+  vm.classesByName("dotty.runtime.DebugEval")
+    .get(0).asInstanceOf[ClassType]
+val eval =
+  debugCls.methodsByName("eval").get(0)
+debugCls.invokeMethod(
+  thread, eval,
+  List(vm.mirrorOf(classpath), stackFrame.thisObject,
+       localVariablesRef)
+)
+```
+
+--
 ## Future work
 - <!-- .element: class="fragment" --> Optimizations
 - <!-- .element: class="fragment" --> More features
   - <!-- .element: class="fragment" --> Documentation on hover
-- <!-- .element: class="fragment" --> Better build tool integration (sbt server mode)
-- <!-- .element: class="fragment" -->  Debugging support (based on the [Java Debug Server](https://github.com/Microsoft/java-debug))
-  - <!-- .element: class="fragment" --> Evaluating Scala expressions in the debugger
+- <!-- .element: class="fragment" --> Better build tool integration (Build Server Protocol!)
 --
 ## Conclusion
 - <!-- .element: class="fragment" --> Design your compiler with interactivity in mind
