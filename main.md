@@ -4,15 +4,16 @@
 <!-- .element: style="text-align: center !important" -->
 --
 ## What is Dotty?
-- <!-- .element: class="fragment" --> A new, experimental compiler for Scala developed at EPFL
+- <!-- .element: class="fragment" --> Research compiler that will become Scala 3
 - <!-- .element: class="fragment" --> Type system internals redesigned, inspired by DOT, but externally very similar
-- <!-- .element: class="fragment" --> More info: [dotty.epfl.ch](dotty.epfl.ch)
+- <!-- .element: class="fragment" --> More info:
+  - [dotty.epfl.ch](dotty.epfl.ch)
+  - Recent blog posts on [scala-lang.org](scala-lang.org)
 --
 ## A chance to redesign components
 - <!-- .element: class="fragment" --> Improved incremental compilation (avoid undercompilation)
 - <!-- .element: class="fragment" --> Better pattern matching checks
-  ([Fengyun 16](https://infoscience.epfl.ch/record/225497/files/p61-liu.pdf),
-  [reused for Swift!](https://github.com/apple/swift/pull/8908))
+  ([algorithm now reused in Swift!](https://github.com/apple/swift/pull/8908))
 
 --
 ## Tooling
@@ -30,11 +31,11 @@ A good developer experience requires good tools:
   - <!-- .element: class="fragment" --> Scala plugin for IntelliJ IDEA
 -- <!-- .element: data-transition="slide-out"  -->
 ## State of the art
-- Based on the [Scala Presentation Compiler](https://github.com/scala/scala/tree/2.12.x/src/interactive/scala/tools/nsc/interactive) (3 KLOC)
-  - Scala-IDE (66 KLOC)
-  - ENSIME (server: 15 KLOC, emacs client: 10 KLOC)
+- Based on the [Scala Presentation Compiler](https://github.com/scala/scala/tree/2.12.x/src/interactive/scala/tools/nsc/interactive) (<span style="color: orangered;">3 KLOC</span>)
+  - Scala-IDE (<span style="color: orangered;">66 KLOC</span>)
+  - ENSIME (server: <span style="color: orangered;">15 KLOC</span>, emacs client: <span style="color: orangered;">10 KLOC</span>)
 - Reimplementation of the Scala typechecker
-  - Scala plugin for IntelliJ IDEA (230 KLOC)
+  - Scala plugin for IntelliJ IDEA (<span style="color: orangered;">230 KLOC</span>)
 -- <!-- .element: data-transition="slide-in"  -->
 ## Design principles
 1. <!-- .element: class="fragment" --> Code reuse
@@ -105,7 +106,7 @@ A good developer experience requires good tools:
 -  <!-- .element: class="fragment" --> Convenience methods for tree traversals, compiler lifecycle management
 -  <!-- .element: class="fragment" --> Used both in the IDE and the REPL (e.g., for completions)
 -  <!-- .element: class="fragment" --> In the future: interruption handling, partial typechecking, ...
--  <!-- .element: class="fragment" --> Less then 1 KLOC
+-  <!-- .element: class="fragment" --> Less then <span style="color: orangered;">1 KLOC</span>
 --
 ## Design principles
 1. <span style="opacity: 0.5;"> Code reuse </span>
@@ -140,7 +141,7 @@ Getting <em style="font-family: serif;">m</em> IDEs to support <em style="font-f
 ## Implementing the Dotty Language Server
 - <!-- .element: class="fragment" --> Low-level message handling done by [Eclipse LSP4J](https://github.com/eclipse/lsp4j)
 - <!-- .element: class="fragment" --> Relies on interactive APIs
-- <!-- .element: class="fragment" --> 0.5 KLOC
+- <!-- .element: class="fragment" --> <span style="color: orangered;">0.5 KLOC</span>
 -- <!-- .element: data-transition="slide-in"  -->
 ```scala
 override def definition(params: TextDocumentPositionParams) =
@@ -385,6 +386,10 @@ ch.epfl.lamp:dotty-language-server_0.8:0.8.0-RC1
 
 ```
 --
+## Build Server Protocol
+-  <!-- .element: class="fragment" --> Instead of making plugins for build tools to extract information, ask them!
+-  <!-- .element: class="fragment" --> We also need a discovery protocol: "How do I start a build server for this project?"
+--
 ## Design principles, revisited
 1. Code reuse
    - <!-- .element: class="fragment" --> Compiler APIs for interactive usage
@@ -393,9 +398,10 @@ ch.epfl.lamp:dotty-language-server_0.8:0.8.0-RC1
 3. Easy to use (and to install!)
    - <!-- .element: class="fragment" --> One command (but we can do better!)
 --
-## Bonus: Debugger Support
+## Going Further: Debugger Support
 - <!-- .element: class="fragment" --> Based on the [Java Debug Server](https://github.com/Microsoft/java-debug)
 - <!-- .element: class="fragment" --> Most features "just work"
+- <!-- .element: class="fragment" --> (Not actually merged in Dotty yet)
 - <!-- .element: class="fragment" --> Challenge: expression evaluation
 -- <!-- .element: data-transition="none"  -->
 ## Expression Evaluation
