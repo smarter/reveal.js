@@ -347,10 +347,6 @@ override def definition(params: TextDocumentPositionParams) =
 2. <span style="opacity: 0.5;"> Editor-agnosticity </span>
 3. <span style="color: orangered;"> Easy to use (and to install!) </span>
 --
-<img src="images/sbt.png" width="70%" style="border: none;">
-
-<!-- .element: style="text-align: center !important" -->
---
 ## sbt integration
 - <!-- .element: class="fragment" --> Analyze the build to find Dotty projects
 - <!-- .element: class="fragment" --> Compile these projects
