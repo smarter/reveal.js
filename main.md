@@ -68,7 +68,7 @@ A good developer experience requires good tools:
 - <!-- .element: class="fragment" -->  Cursor position = 🚩
 - <!-- .element: class="fragment" -->  Query: jump to definition
 -- <!-- .element: data-transition="none"  -->
-## Tree after <span style="text-transform: none; font-family: monospace;">Typer</span>
+## Tree after typechecking
 ```scala
   final val elem: 1 = 1
 
@@ -77,7 +77,7 @@ A good developer experience requires good tools:
 - <!-- .element: class="fragment" --> Every tree node has a type and a position
 - <!-- .element: class="fragment" --> Query can be answered
 -- <!-- .element: data-transition="slide-out"  -->
-## Tree after <span style="text-transform: none; font-family: monospace;">FirstTransform</span>
+## Tree after constant folding
 ```scala
   final val elem: 1 = 1
 
@@ -87,7 +87,7 @@ A good developer experience requires good tools:
 - <!-- .element: class="fragment" --> Impossible to answer query
 --
 ## Querying the compiler
-- <!-- .element: class="fragment" --> Store trees before `FirstTransform`
+- <!-- .element: class="fragment" --> Store trees right after typechecking
 - <!-- .element: class="fragment" --> Respond to IDE queries by traversing trees
 - <!-- .element: class="fragment" --> What about code that has already been compiled?
 --
@@ -117,7 +117,7 @@ A good developer experience requires good tools:
 <!-- ## Editor-agnosticity -->
 --
 ## The IDE Portability Problem
-Getting <em style="font-family: serif;">m</em> IDEs to support <em style="font-family: serif;">n</em> programming languages requires <em style="font-family: serif;">n*m</em> IDE plugins.
+Getting <em style="font-family: serif;">m</em> IDEs to support <em style="font-family: serif;">n</em> programming languages requires <em style="font-family: serif;">m*n</em> IDE plugins.
 <!-- Developing IDE plugin require expertise both in compiler internals and IDE internals. -->
 --
 ## The Language Server Protocol
