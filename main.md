@@ -270,6 +270,12 @@ runST :: forall a. (forall s. ST s a) -> a
 ```
 
 --
+## Todo List
+
+- <!-- .element: class="fragment" --> Implement type inference
+- <!-- .element: class="fragment" --> Figure out the syntax
+
+--
 ## Questions ?
 - PR: https://github.com/lampepfl/dotty/pull/4672
 - More info: [dotty.epfl.ch](dotty.epfl.ch)
