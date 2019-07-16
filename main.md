@@ -87,22 +87,25 @@ def m[T](x: T): List[T]
 <!-- .element: class="fragment" -->
 
 --
-## Abusing refinements
+## Abusing refinement types
 
-``` scala
-def m[T](x: T): List[T]
-```
-<!-- .element: class="fragment" -->
+How do I represent this using Scala types ?
 
 ``` scala
 [T] => (x: T) => List[T]
 ```
-<!-- .element: class="fragment" -->
+
+
+I want something that has an apply method with the correct type <!-- .element: class="fragment" --> 
+
+Given a marker trait: <!-- .element: class="fragment" --> 
 
 ``` scala
-trait PolyFunction
+trait PolyFunction {}
 ```
 <!-- .element: class="fragment" -->
+
+We can make up a refinement type: <!-- .element: class="fragment" --> 
 
 ``` scala
 PolyFunction {
@@ -111,10 +114,24 @@ PolyFunction {
 ```
 <!-- .element: class="fragment" -->
 
+--
+# WAT
+
+<img src="images/wat.jpg" width="80%" style="border: none; margin-left: 8%;">
+
+--
+# No way
+
+Yes way! <!-- .element: class="fragment" --> 
+
+Take that thing: <!-- .element: class="fragment" --> 
+
 ``` scala
 val f = [T] => (x: T) => List(x)
 ```
 <!-- .element: class="fragment" -->
+
+And desugar it to: <!-- .element: class="fragment" --> 
 
 ``` scala
 val f = new PolyFunction {
