@@ -1,9 +1,9 @@
-# Adding polymorphic functions to Scala
+# A universal encoding for functions
 [Guillaume Martres](http://guillaume.martres.me) - EPFL
 
 <!-- .element: style="text-align: center !important" -->
 --
-## Methods
+## In the beginning, there were methods
 ``` scala
 def m(x: Int): List[Int] = List(x)
 ```
@@ -12,28 +12,28 @@ def m(x: Int): List[Int] = List(x)
 - <!-- .element: class="fragment" --> Trying to use a method as a value converts it into a function by eta-expansion
 
 ``` scala
-val f: Int => List[Int] = m
+val f = m
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 Adapted to: <!-- .element: class="fragment" -->
 
 ``` scala
-val f: Int => List[Int] = x => m(x)
+val f = x => m(x)
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 --
-## Functions
+## Let there be functions!
 ``` scala
-val f: Int => List[Int] = x => m(x)
+val f = x => m(x)
 f(1)
 ```
 
-Interpreted as: <!-- .element: class="fragment" --> 
+Equivalent to: <!-- .element: class="fragment" -->
 
 ``` scala
-val f: Function1[Int, List[Int]] = new Function1[Int, List[Int]] {
+val f = new Function1[Int, List[Int]] {
   def apply(x: Int): List[Int] = m(x)
 }
 f.apply(1)
@@ -41,7 +41,7 @@ f.apply(1)
 <!-- .element: class="fragment" -->
 
 --
-## <span style="text-transform: none;">Function*</span>
+## <span style="text-transform: none;">The Function* family</span>
 
 - <!-- .element: class="fragment" --> From Function0 to Function22
 
@@ -50,10 +50,10 @@ trait Function1[+T, -R] {
   def apply(x: T): R
 }
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 - <!-- .element: class="fragment" --> New in Dotty, FunctionN for all N
-  - <!-- .element: class="fragment" --> Erases to FunctionXXL
+  - <!-- .element: class="fragment" --> Compiler fiction: erases to FunctionXXL
 
 ``` scala
 trait FunctionXXL {
@@ -64,220 +64,300 @@ trait FunctionXXL {
 
 --
 
-## Back to methods
-- <!-- .element: class="fragment" --> Multiple parameter lists:
-
-``` scala
-def m(x: Int)(y: Int): List[Int]
-```
-<!-- .element: class="fragment" --> 
-
-``` scala
-Int => Int => List[Int]
-```
-<!-- .element: class="fragment" --> 
-
-- <!-- .element: class="fragment" --> Repeated parameters:
-
-``` scala
-def m(xs: Int*): List[Int]
-```
-<!-- .element: class="fragment" --> 
-
-``` scala
-Seq[Int] => List[Int]
-```
-<!-- .element: class="fragment" --> 
-
-- <!-- .element: class="fragment" --> Default parameters:
-
-``` scala
-def m(x: Int = 1): List[Int]
-```
-<!-- .element: class="fragment" --> 
-
-``` scala
-Int => List[Int] // ¯\_(ツ)_/¯
-```
-<!-- .element: class="fragment" --> 
-
---
 ## But wait, there's more
-
 - <!-- .element: class="fragment" --> Implicit parameters:
 
 ``` scala
 def m(implicit x: Int): List[Int]
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
-``` scala
-implicit Int => List[Int]
-```
-<!-- .element: class="fragment" --> 
-
-- <!-- .element: class="fragment" --> See the Dotty documentation
-- <!-- .element: class="fragment" --> See the Simplicitly paper by Odersky et al.<!-- .element: class="fragment" -->
-
---
-## But wait, there's even more
-- <!-- .element: class="fragment" --> Dependent method:
+- <!-- .element: class="fragment" --> Dependent:
 
 ``` scala
 def m(x: Int): List[x.type]
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
-``` scala
-(x: Int) => List[x.type]
-```
-<!-- .element: class="fragment" --> 
-
-``` scala
-Function1[Int, List[Int]] {
-  def apply(x: Int): List[x.type]
-}
-```
-<!-- .element: class="fragment" --> 
-
-Erases to Function1 <!-- .element: class="fragment" -->
-
---
-## Polymorphism
+- <!-- .element: class="fragment" --> Polymorphic:
 
 ``` scala
 def m[T](x: T): List[T]
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
+
+--
+## Abusing refinements
+
+``` scala
+def m[T](x: T): List[T]
+```
+<!-- .element: class="fragment" -->
 
 ``` scala
 [T] => (x: T) => List[T]
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 ``` scala
 trait PolyFunction
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 ``` scala
 PolyFunction {
   def apply[T](x: T): List[T]
 }
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 ``` scala
 val f = [T] => (x: T) => List(x)
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 ``` scala
 val f = new PolyFunction {
   def apply[T](x: T): List[T] = List(x)
 }
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 --
 ## Magic Erasure
 
-Given: <!-- .element: class="fragment" --> 
+Given the type: <!-- .element: class="fragment" -->
 
 ``` scala
 PolyFunction {
-  def apply[T_1, ..., T_M](x_1: T, ..., x_N: S): List[T]
+  def apply[T_1, ..., T_M](x_1: S_1, ..., x_N: S_N): R
 }
 
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
-Erase it to: <!-- .element: class="fragment" --> 
+Erase it to: <!-- .element: class="fragment" -->
 
 ``` scala
 FunctionN
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 --
-## Polymorphic values ?
-``` scala
-val f: [T] List[T] = Nil
+## Let's talk about subtyping
+
+```scala
+val headSeq: Seq[Int] => Int = x => x.head
 ```
- <!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
-- Unsound: <!-- .element: class="fragment" --> 
-
-``` scala
-class Ref[T](var x: T)
-val f: [T] Ref[List[T]] = new Ref(Nil)
-
-val r1: Ref[List[Int]] = f[Int]
-val r2: Ref[List[String]] = f[String]
-r1.x = List(1)
-
-val elem: String = r2.x.head // ClassCastException 😱
+```scala
+val headList: List[Int] => Int = headSeq
 ```
- <!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
-- <!-- .element: class="fragment" --> Solution in SML: "value restriction" 
---
-## Just use covariance
-``` scala
-val f: List[Nothing] = Nil
+```scala
+List[Int] <:< Seq[Int]
+```
+<!-- .element: class="fragment" -->
 
-val f1: List[Int] = f
+```scala
+Seq[Int] => Int <:< List[Int] => Int
 ```
---
-# Usecases
---
-## Writing Haskell fanfiction
-
-``` haskell
-forall a b. Functor f => (a -> b) -> f a -> f b
-```
- <!-- .element: class="fragment" --> 
-
-``` scala
-[F[_], A, B] => (A => B) => F[A] => implicit Functor[F] => F[B]
-```
- <!-- .element: class="fragment" --> 
- 
-``` scala
-[F[_]: Functor, A, B] => (A => B) => F[A] => F[B]
-```
- <!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
 --
-## Scala fashion
-- <!-- .element: class="fragment" --> 2018 trends:
-  - <!-- .element: class="fragment" --> Free monads are out
-  - <!-- .element: class="fragment" --> Tagless final is in
+## Going polymorphic
 
-``` scala
-type Program[Alg[_[_]], A] = [F[_]: Applicative] => Alg[F] => F[A]
+```scala
+val headSeq: [T] => Seq[T] => T = [T] => x => x.head
 ```
-<!-- .element: class="fragment" --> 
+<!-- .element: class="fragment" -->
 
-- <!-- .element: class="fragment" --> See "Optimizing Tagless Final" blog post
-  series by Luka Jacobowitz on https://typelevel.org/blog
+```scala
+val headList: [T] => List[T] => T = headSeq
+```
+<!-- .element: class="fragment" -->
+
+- <!-- .element: class="fragment" --> parameters of methods in refinements
+  are invariant:
+
+```scala
+PolyFunction { def apply[T](x: Seq[T]): T }
+
+                  !<:<
+
+PolyFunction { def apply[T](x: List[T]): T }
+```
+<!-- .element: class="fragment" -->
 
 --
-## Resource leaks
+## But why though ?
 
-```haskell
-runST :: forall a. (forall s. ST s a) -> a
+- <!-- .element: class="fragment" --> Structural type members correspond to Java methods
+- <!-- .element: class="fragment" --> The JVM does not have a notion of variance built-in:
+
+```scala
+def apply[T](x: Seq[T]): T
+def apply[T](x: List[T]): T
 ```
+<!-- .element: class="fragment" -->
+
+- <!-- .element: class="fragment" --> These are just overloads
 
 --
-## Todo List
+## Making up our own rules
 
-- <!-- .element: class="fragment" --> Implement type inference
-- <!-- .element: class="fragment" --> Figure out the syntax
+- <!-- .element: class="fragment" --> Special-case subtyping of refined
+  PolyFunction:
+
+```scala
+PolyFunction { def apply[T](x: Seq[T]): T }
+
+                  <:<
+
+PolyFunction { def apply[T](x: List[T]): T }
+```
+<!-- .element: class="fragment" -->
+
+- <!-- .element: class="fragment" --> This is OK because in the end we're just
+  calling the `apply` method defined in `Function1`
+
+--
+## This isn't very satisfying
+
+- <!-- .element: class="fragment" --> Lots of function types: polymorphic,
+  dependent, implicit, arity >= 23, ...
+- <!-- .element: class="fragment" --> All have their own encoding with their own
+  limitations
+- <!-- .element: class="fragment" --> Combinatorics: how do you encode a polymorphic implicit
+  dependent function ?
+--
+## One encoding to rule them all
+
+- <!-- .element: class="fragment" --> The semantics of `PolyFunction` aren't
+  really specific to polymorphic functions.
+- <!-- .element: class="fragment" --> Let's rename it to `Function`.
+
+```scala
+Int => Int
+```
+<!-- .element: class="fragment" -->
+
+```scala
+// Old and tired
+Function1[Int, Int]
+```
+<!-- .element: class="fragment" -->
+
+```scala
+// New hotness!
+Function {
+  def apply(x: Int): Int
+}
+```
+<!-- .element: class="fragment" -->
+
+--
+## Economy of concepts
+
+```scala
+(x: Int) => List[x.type]
+```
+
+<!-- .element: class="fragment" -->
+```scala
+Function {
+  def apply(x: Int): List[x.type]
+}
+```
+<!-- .element: class="fragment" -->
+
+```scala
+(implicit x: Int) => Int
+```
+
+<!-- .element: class="fragment" -->
+```scala
+Function {
+  def apply(implicit x: Int): Int
+}
+```
+<!-- .element: class="fragment" -->
+
+--
+## Source and binary compatibility
+
+```scala
+type Function0[+R] = Function { def apply(): R }
+type Function1[-T1, +R] = Function { def apply(a: T1): R }
+// ...
+```
+<!-- .element: class="fragment" -->
+
+- <!-- .element: class="fragment" --> Reinterpret types referenced in sources or classfiles
+- <!-- .element: class="fragment" --> Erase them to their original representation!
+
+--
+## Complication: subclassing
+
+```scala
+abstract class MyFun extends Function1[Int, Int] {
+  def zero: Int = apply(0)
+}
+```
+<!-- .element: class="fragment" -->
+
+```scala
+abstract class MyFun extends (Function { def apply(x: Int): Int }) {
+  def zero: Int = apply(0)
+}
+```
+<!-- .element: class="fragment" -->
+
+--
+## Complication: inference
+
+```scala
+def foo[B](f: Int => B): Unit
+val dep: (x: Int) => List[x.type]
+foo(dep) // B = ?
+```
+<!-- .element: class="fragment" -->
+
+- <!-- .element: class="fragment" --> Constraint:
+
+```scala
+B >: List[x.type]
+```
+<!-- .element: class="fragment" -->
+
+- <!-- .element: class="fragment" --> Can't infer `B = List[x.type]`, because `x` is not in scope!
+- <!-- .element: class="fragment" --> Need to _avoid_ types which are not in
+  scope
+
+```scala
+B = List[Int]
+```
+<!-- .element: class="fragment" -->
+
+- <!-- .element: class="fragment" --> Type avoidance is a common operation in
+  the typechecker.
+
+--
+## Is this actually a good idea ?
+
+- <!-- .element: class="fragment" --> Not sure yet
+- <!-- .element: class="fragment" --> Functions are pretty fundamental to Scala,
+  changing them in any way is pretty risky
+- <!-- .element: class="fragment" --> Things that could go wrong:
+  - <!-- .element: class="fragment" --> Compile-time performance hit
+  - <!-- .element: class="fragment" --> Runtime performance hit
+  - <!-- .element: class="fragment" --> Existing semantics too hard to preserve exactly
+  - <!-- .element: class="fragment" --> Everything I haven't thought about yet
 
 --
 ## Questions ?
-- PR: https://github.com/lampepfl/dotty/pull/4672
 - More info: [dotty.epfl.ch](dotty.epfl.ch)
 - Come chat with us: [gitter.im/lampepfl/dotty](http://gitter.im/lampepfl/dotty)
 - Contributors welcome!
