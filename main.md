@@ -124,22 +124,43 @@ val f = new PolyFunction {
 <!-- .element: class="fragment" -->
 
 --
-## Magic Erasure
+## Magic Erasure on types
 
-Given the type: <!-- .element: class="fragment" -->
+Given the type:
 
 ``` scala
 PolyFunction {
-  def apply[T_1, ..., T_M](x_1: S_1, ..., x_N: S_N): R
+  def apply[T](x: T): List[T]
 }
 
 ```
-<!-- .element: class="fragment" -->
+
 
 Erase it to: <!-- .element: class="fragment" -->
 
 ``` scala
-FunctionN
+Function1
+```
+<!-- .element: class="fragment" -->
+
+--
+## Magic Erasure on values
+
+Given the value:
+
+``` scala
+new PolyFunction {
+  def apply[T](x: T): List[T] = List(x)
+}
+
+```
+
+Erase it to: <!-- .element: class="fragment" -->
+
+``` scala
+new Function1 {
+  def apply(x: Object): Object = List(x)
+}
 ```
 <!-- .element: class="fragment" -->
 
