@@ -3,7 +3,7 @@
 
 <!-- .element: style="text-align: center !important" -->
 --
-## In the beginning, there were methods
+## In the beginning, there were methods 📘
 ``` scala
 def m(x: Int): List[Int] = List(x)
 ```
@@ -24,7 +24,7 @@ val f = x => m(x)
 <!-- .element: class="fragment" -->
 
 --
-## Let there be functions!
+## Let there be functions! 💥
 ``` scala
 val f = x => m(x)
 f(1)
@@ -41,7 +41,7 @@ f.apply(1)
 <!-- .element: class="fragment" -->
 
 --
-## <span style="text-transform: none;">The Function* family</span>
+## <span style="text-transform: none;">The Function* family</span> 👪
 
 - <!-- .element: class="fragment" --> From Function0 to Function22
 
@@ -120,7 +120,7 @@ PolyFunction {
 <img src="images/wat.jpg" width="80%" style="border: none; margin-left: 8%;">
 
 --
-# No way
+# No way!
 
 Yes way! <!-- .element: class="fragment" --> 
 
@@ -141,7 +141,7 @@ val f = new PolyFunction {
 <!-- .element: class="fragment" -->
 
 --
-## Magic Erasure on types
+## ✨Magic✨Erasure on types
 
 Given the type:
 
@@ -161,7 +161,7 @@ Function1
 <!-- .element: class="fragment" -->
 
 --
-## Magic Erasure on values
+## ✨Magic✨ Erasure on values
 
 Given the value:
 
@@ -180,6 +180,11 @@ new Function1 {
 }
 ```
 <!-- .element: class="fragment" -->
+
+--
+# Problem solved!🎊
+
+## <!-- .element: class="fragment" --> ... actually not quite.
 
 --
 ## Let's talk about subtyping
@@ -230,7 +235,7 @@ PolyFunction { def apply[T](x: List[T]): T }
 <!-- .element: class="fragment" -->
 
 --
-## But why though ?
+## But why though ? 🤔
 
 - <!-- .element: class="fragment" --> Structural type members correspond to Java methods
 - <!-- .element: class="fragment" --> The JVM does not have a notion of variance built-in:
@@ -271,7 +276,7 @@ PolyFunction { def apply[T](x: List[T]): T }
 - <!-- .element: class="fragment" --> Combinatorics: how do you encode a polymorphic implicit
   dependent function ?
 --
-## One encoding to rule them all
+## One encoding to rule them all 🔥
 
 - <!-- .element: class="fragment" --> The semantics of `PolyFunction` aren't
   really specific to polymorphic functions.
@@ -383,7 +388,7 @@ B = List[Int]
   the typechecker.
 
 --
-## Is this actually a good idea ?
+## Is this actually a good idea ?  🤔
 
 - <!-- .element: class="fragment" --> Not sure yet
 - <!-- .element: class="fragment" --> Functions are pretty fundamental to Scala,
@@ -395,7 +400,25 @@ B = List[Int]
   - <!-- .element: class="fragment" --> Everything I haven't thought about yet
 
 --
-## Questions ?
+# Summary
+
+--
+## Before
+
+<img src="images/family.jpg" width="60%" style="border: none; margin-left: 20%;">
+
+--
+## After
+
+<img src="images/single.jpg" width="100%" style="border: none; margin-left: 3%;">
+
+--
+## What we'd like to avoid
+
+<img src="images/sinking.jpg" width="100%" style="border: none; margin-left: 2%;">
+
+--
+## Questions ? 🦆
 - More info: [dotty.epfl.ch](dotty.epfl.ch)
 - Come chat with us: [gitter.im/lampepfl/dotty](http://gitter.im/lampepfl/dotty)
 - Contributors welcome!
