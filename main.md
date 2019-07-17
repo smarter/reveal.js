@@ -46,7 +46,7 @@ f.apply(1)
 - <!-- .element: class="fragment" --> From Function0 to Function22
 
 ``` scala
-trait Function1[+T, -R] {
+trait Function1[-T, +R] {
   def apply(x: T): R
 }
 ```
