@@ -3,7 +3,7 @@
 
 <!-- .element: style="text-align: center !important" -->
 --
-## In the beginning, there were methods 📘
+## In the beginning, there were methods
 ``` scala
 def m(x: Int): List[Int] = List(x)
 ```
